@@ -1,22 +1,29 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Gamepad2, Tv, Users, LogIn, Server, ShieldCheck, Play } from 'lucide-react';
-import { useGamepad, GamepadSnapshot } from './hooks/useGamepad.ts';
-import { useSignaling } from './hooks/useSignaling.ts';
+import React, { useState } from 'react';
+import { Gamepad2, Tv, MessageSquare, Users, Server, LogIn } from 'lucide-react';
 import { ChannelSidebar } from './components/ChannelSidebar.tsx';
 import { ScreenStream } from './components/ScreenStream.tsx';
 import { ChatPanel } from './components/ChatPanel.tsx';
 import { MemberQueueSidebar } from './components/MemberQueueSidebar.tsx';
 import { GamepadVisualizer } from './components/GamepadVisualizer.tsx';
+import { useGamepad } from './hooks/useGamepad.ts';
+import { useSignaling } from './hooks/useSignaling.ts';
 
+/**
+ * Pass the Controller - Main Application Shell
+ * -------------------------------------------------------------
+ * Starter template for Lyla (Frontend & UI), Simon (Networking),
+ * and Joshua (QA & Input).
+ *
+ * For the complete working implementation, see the `playground` branch:
+ *   git checkout playground
+ */
 export default function App() {
   const [username, setUsername] = useState('Gamer_' + Math.floor(1000 + Math.random() * 9000));
-  const [clientId] = useState('client_' + Math.random().toString(36).substring(2, 9));
   const [roomCode, setRoomCode] = useState('LOBBY');
   const [isHost, setIsHost] = useState(false);
   const [joined, setJoined] = useState(false);
-  const [sidecarStatus, setSidecarStatus] = useState<string>('idle');
 
-  // Signaling Hook
+  // TODO (Simon & Michael): Hook up room state and messaging via useSignaling
   const {
     connected,
     roomState,
@@ -25,65 +32,12 @@ export default function App() {
     requestController,
     passController,
     reclaimController,
-  } = useSignaling(
-    'ws://localhost:8080',
-    joined ? roomCode : '',
-    clientId,
-    username,
-    isHost
-  );
+  } = useSignaling('ws://localhost:8080', joined ? roomCode : '', 'user_1', username, isHost);
 
-  const isTokenHolder = roomState.controllerHolder === clientId;
-  const currentHolderMember = roomState.members.find((m) => m.client_id === roomState.controllerHolder);
+  // TODO (Joshua & Sam): Hook up physical gamepad polling via useGamepad
+  const gamepadSnapshot = useGamepad();
 
-  // Local sidecar connection for Host to inject inputs
-  const sidecarSocketRef = useRef<WebSocket | null>(null);
-
-  // Host launches sidecar daemon when hosting
-  const handleStartHosting = async () => {
-    setIsHost(true);
-    setJoined(true);
-    if (window.passTheController?.startSidecar) {
-      setSidecarStatus('starting');
-      const res = await window.passTheController.startSidecar(9876);
-      setSidecarStatus(res.status);
-    }
-  };
-
-  // Connect local WebSocket to sidecar on localhost:9876 if host
-  useEffect(() => {
-    if (isHost && joined) {
-      const ws = new WebSocket('ws://127.0.0.1:9876');
-      ws.onopen = () => {
-        console.log('[Sidecar Bridge] Connected to local input daemon');
-        setSidecarStatus('connected');
-      };
-      ws.onerror = () => {
-        setSidecarStatus('offline');
-      };
-      sidecarSocketRef.current = ws;
-      return () => {
-        ws.close();
-      };
-    }
-  }, [isHost, joined]);
-
-  // Read gamepad and forward to sidecar if holding controller
-  const handleGamepadFrame = (snapshot: GamepadSnapshot) => {
-    if (isTokenHolder && sidecarSocketRef.current?.readyState === WebSocket.OPEN) {
-      sidecarSocketRef.current.send(
-        JSON.stringify({
-          type: 'gamepad_state',
-          buttons: snapshot.buttons,
-          triggers: snapshot.triggers,
-          axes: snapshot.axes,
-        })
-      );
-    }
-  };
-
-  const gamepadSnapshot = useGamepad(handleGamepadFrame);
-
+  // Screen 1: Welcome / Join Screen
   if (!joined) {
     return (
       <div
@@ -103,17 +57,16 @@ export default function App() {
             width: '440px',
             padding: '24px',
             textAlign: 'center',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
           }}
         >
           <div style={{ display: 'inline-flex', padding: '12px', background: '#1c2233', borderRadius: '50%', marginBottom: '12px' }}>
             <Gamepad2 size={36} color="var(--accent-green)" />
           </div>
-          <h2 style={{ fontFamily: 'var(--font-mono)', fontSize: '20px', letterSpacing: '1px', color: '#fff', marginBottom: '4px' }}>
+          <h2 style={{ fontFamily: 'var(--font-mono)', fontSize: '20px', color: '#fff', marginBottom: '4px' }}>
             PASS THE CONTROLLER
           </h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '12px', marginBottom: '20px' }}>
-            Social Game Streaming & Virtual Controller Sharing
+            Capstone Starter Template • Main Branch
           </p>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', textAlign: 'left', marginBottom: '20px' }}>
@@ -144,9 +97,12 @@ export default function App() {
             <button
               className="retro-button accent"
               style={{ flex: 1, justifyContent: 'center', padding: '10px' }}
-              onClick={handleStartHosting}
+              onClick={() => {
+                setIsHost(true);
+                setJoined(true);
+              }}
             >
-              <Server size={14} /> Host Game
+              <Server size={14} /> Host Session
             </button>
             <button
               className="retro-button"
@@ -156,7 +112,7 @@ export default function App() {
                 setJoined(true);
               }}
             >
-              <LogIn size={14} /> Join Room
+              <LogIn size={14} /> Join Session
             </button>
           </div>
         </div>
@@ -164,6 +120,7 @@ export default function App() {
     );
   }
 
+  // Screen 2: Active Room Session Layout
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw', background: 'var(--bg-primary)' }}>
       {/* Top Application Bar */}
@@ -182,21 +139,15 @@ export default function App() {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Gamepad2 size={16} color="var(--accent-green)" />
-          <span style={{ fontWeight: 700, color: '#fff' }}>PASS THE CONTROLLER v1.0</span>
+          <span style={{ fontWeight: 700, color: '#fff' }}>PASS THE CONTROLLER</span>
           <span style={{ color: 'var(--text-muted)' }}>|</span>
           <span style={{ color: 'var(--accent-cyan)' }}>ROOM: {roomCode}</span>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          {isHost && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span className={`led-lamp ${sidecarStatus === 'connected' ? 'active-green' : 'active-amber'}`} />
-              <span style={{ color: 'var(--text-muted)' }}>Input Daemon: {sidecarStatus}</span>
-            </div>
-          )}
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span className={`led-lamp ${connected ? 'active-green' : 'active-amber'}`} />
-            <span style={{ color: 'var(--text-muted)' }}>Signaling: {connected ? 'Online' : 'Connecting...'}</span>
+            <span style={{ color: 'var(--text-muted)' }}>Signaling: {connected ? 'Online' : 'Disconnected'}</span>
           </div>
           <button className="retro-button" style={{ padding: '2px 8px', fontSize: '10px' }} onClick={() => setJoined(false)}>
             Leave Room
@@ -211,12 +162,8 @@ export default function App() {
 
         {/* Center: Stream Viewport + Gamepad Visualizer HUD */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '8px', gap: '8px', minWidth: 0 }}>
-          <ScreenStream
-            isHost={isHost}
-            controllerHolderName={currentHolderMember?.username || 'Host'}
-            isTokenHolder={isTokenHolder}
-          />
-          <GamepadVisualizer snapshot={gamepadSnapshot} isTokenHolder={isTokenHolder} />
+          <ScreenStream isHost={isHost} controllerHolderName={username} isTokenHolder={true} />
+          <GamepadVisualizer snapshot={gamepadSnapshot} isTokenHolder={true} />
         </div>
 
         {/* Right-Center: Chat Feed */}
@@ -230,7 +177,7 @@ export default function App() {
             members={roomState.members}
             controllerHolderId={roomState.controllerHolder}
             controllerQueue={roomState.controllerQueue}
-            currentClientId={clientId}
+            currentClientId={'user_1'}
             isHost={isHost}
             onRequestController={requestController}
             onPassController={passController}

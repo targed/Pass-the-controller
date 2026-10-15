@@ -1,1 +1,0 @@
-# Sidecar test package init
