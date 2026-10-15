@@ -1,0 +1,170 @@
+:root {
+  --bg-primary: #0f1117;
+  --bg-secondary: #171b26;
+  --bg-tertiary: #1f2433;
+  --bg-accent: #262c3e;
+  --panel-border: #2e364d;
+  --panel-bevel-light: #3e4866;
+  --panel-bevel-dark: #0a0c10;
+
+  --accent-green: #00ff88;
+  --accent-cyan: #00e5ff;
+  --accent-amber: #ffaa00;
+  --accent-magenta: #ff0077;
+  --accent-purple: #9d4edd;
+
+  --text-primary: #e6edf3;
+  --text-muted: #8b949e;
+  --text-glow: rgba(0, 255, 136, 0.4);
+
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'Share Tech Mono', monospace;
+  --font-retro: 'VT323', monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  overflow: hidden;
+  user-select: none;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* Retro Scanline Overlay Effect */
+.retro-scanlines {
+  position: relative;
+}
+.retro-scanlines::after {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+  background-size: 100% 4px;
+  z-index: 10;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* Retro Panel Bevel Styling (WinAMP / 2000s Aesthetic) */
+.retro-panel {
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--panel-bevel-light);
+  border-left: 1px solid var(--panel-bevel-light);
+  border-right: 1px solid var(--panel-bevel-dark);
+  border-bottom: 1px solid var(--panel-bevel-dark);
+  border-radius: 4px;
+  box-shadow: inset 1px 1px 0px rgba(255,255,255,0.05), 0 4px 12px rgba(0,0,0,0.4);
+}
+
+.retro-inset {
+  background: #090b0e;
+  border-top: 1px solid var(--panel-bevel-dark);
+  border-left: 1px solid var(--panel-bevel-dark);
+  border-right: 1px solid var(--panel-bevel-light);
+  border-bottom: 1px solid var(--panel-bevel-light);
+  border-radius: 3px;
+}
+
+/* Retro Buttons */
+.retro-button {
+  background: linear-gradient(180deg, #2a3144 0%, #1a1e2b 100%);
+  color: var(--text-primary);
+  border: 1px solid #3d4661;
+  border-radius: 3px;
+  padding: 6px 14px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.retro-button:hover {
+  background: linear-gradient(180deg, #353e56 0%, #222838 100%);
+  border-color: var(--accent-cyan);
+  color: #ffffff;
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.3);
+}
+
+.retro-button:active {
+  background: #141721;
+  box-shadow: inset 1px 1px 3px rgba(0,0,0,0.7);
+  transform: translateY(1px);
+}
+
+.retro-button.accent {
+  background: linear-gradient(180deg, #00bd65 0%, #007740 100%);
+  border-color: #00ff88;
+  color: #000;
+  font-weight: 700;
+}
+
+.retro-button.accent:hover {
+  background: linear-gradient(180deg, #00e078 0%, #009952 100%);
+  box-shadow: 0 0 12px var(--text-glow);
+}
+
+.retro-button.danger {
+  background: linear-gradient(180deg, #b31b37 0%, #6e0d1f 100%);
+  border-color: #ff3355;
+  color: #fff;
+}
+
+.retro-button.danger:hover {
+  box-shadow: 0 0 10px rgba(255, 51, 85, 0.4);
+}
+
+/* LED Indicator Lamps */
+.led-lamp {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  background: #2a3144;
+  box-shadow: inset 1px 1px 2px rgba(0,0,0,0.8);
+}
+
+.led-lamp.active-green {
+  background: var(--accent-green);
+  box-shadow: 0 0 8px var(--accent-green), inset 1px 1px 2px rgba(255,255,255,0.8);
+}
+
+.led-lamp.active-amber {
+  background: var(--accent-amber);
+  box-shadow: 0 0 8px var(--accent-amber), inset 1px 1px 2px rgba(255,255,255,0.8);
+}
+
+.led-lamp.active-cyan {
+  background: var(--accent-cyan);
+  box-shadow: 0 0 8px var(--accent-cyan), inset 1px 1px 2px rgba(255,255,255,0.8);
+}
+
+/* Scrollbar Customization */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #090b0e;
+}
+::-webkit-scrollbar-thumb {
+  background: #262c3e;
+  border-radius: 4px;
+  border: 1px solid #343c54;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #39425c;
+}

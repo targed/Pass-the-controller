@@ -1,0 +1,53 @@
+name: Build & Release Desktop Installers
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  release:
+    name: Build Multi-Platform Installers (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+        include:
+          - os: windows-latest
+            artifact_name: Pass-The-Controller-Windows.exe
+          - os: ubuntu-latest
+            artifact_name: Pass-The-Controller-Linux.AppImage
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Client Dependencies
+        working-directory: client
+        run: npm install
+
+      - name: Build Web Renderer
+        working-directory: client
+        run: npm run build
+
+      - name: Package with Electron-Builder
+        working-directory: client
+        run: npm run package
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: installers-${{ matrix.os }}
+          path: |
+            client/release/*.exe
+            client/release/*.AppImage
+            client/release/*.deb

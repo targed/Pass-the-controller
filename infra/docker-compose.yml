@@ -1,0 +1,22 @@
+services:
+  signaling:
+    build:
+      context: ../signaling
+      dockerfile: Dockerfile
+    container_name: ptc-signaling
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  coturn:
+    image: coturn/coturn:latest
+    container_name: ptc-coturn
+    restart: unless-stopped
+    ports:
+      - "3478:3478"
+      - "3478:3478/udp"
+    volumes:
+      - ./coturn/turnserver.conf:/etc/coturn/turnserver.conf:ro
+    command: ["-c", "/etc/coturn/turnserver.conf"]

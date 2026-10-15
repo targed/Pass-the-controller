@@ -1,0 +1,7 @@
+websockets>=12.0
+pytest>=8.0.0
+# Platform-specific dependencies (install depending on host OS):
+# Windows:
+#   vgamepad>=0.1.0
+# Linux:
+#   evdev>=1.7.0

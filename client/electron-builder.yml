@@ -1,0 +1,56 @@
+appId: com.passthecontroller.app
+productName: Pass the Controller
+copyright: Copyright © 2026 Pass the Controller Team
+
+directories:
+  output: release
+  buildResources: build
+
+files:
+  - dist/**/*
+  - dist-electron/**/*
+  - package.json
+
+extraResources:
+  - from: ../sidecar
+    to: sidecar
+    filter:
+      - "agent_mock.py"
+      - "agent_win.py"
+      - "agent_linux.py"
+      - "requirements.txt"
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+    - target: portable
+      arch:
+        - x64
+  artifactName: ${productName}-Windows-${version}.${ext}
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+
+linux:
+  target:
+    - target: AppImage
+      arch:
+        - x64
+    - target: deb
+      arch:
+        - x64
+  category: Game;Network
+  artifactName: ${productName}-Linux-${version}.${ext}
+
+mac:
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+  artifactName: ${productName}-macOS-${version}.${ext}

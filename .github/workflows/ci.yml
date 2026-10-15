@@ -1,0 +1,62 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main, dev ]
+
+jobs:
+  validate-infra:
+    name: Validate Docker Compose Infra
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate Docker Compose Configuration
+        run: docker compose -f infra/docker-compose.yml config
+
+  test-backend-and-sidecar:
+    name: Run Python Tests (Signaling & Sidecar)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Signaling Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r signaling/requirements.txt
+          pip install -r sidecar/requirements.txt
+
+      - name: Run Signaling Tests
+        run: pytest signaling/tests -v
+
+      - name: Run Sidecar Protocol Tests
+        run: pytest sidecar/tests -v
+
+  build-client:
+    name: Compile & Typecheck Electron Client
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: 'client/package-lock.json'
+
+      - name: Install Client Dependencies
+        working-directory: client
+        run: npm install
+
+      - name: Typecheck & Build Client
+        working-directory: client
+        run: npm run build

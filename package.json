@@ -1,0 +1,25 @@
+{
+  "name": "pass-the-controller-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Pass the Controller - Social Game Streaming & Virtual Controller Passing Platform",
+  "scripts": {
+    "dev": "pnpm --filter client dev",
+    "build": "pnpm --filter client build",
+    "package": "pnpm --filter client package",
+    "infra:up": "docker compose -f infra/docker-compose.yml up -d",
+    "infra:down": "docker compose -f infra/docker-compose.yml down",
+    "infra:logs": "docker compose -f infra/docker-compose.yml logs -f",
+    "test:signaling": "pytest signaling",
+    "test:sidecar": "pytest sidecar"
+  },
+  "keywords": [
+    "webrtc",
+    "game-streaming",
+    "controller-sharing",
+    "electron",
+    "fastapi"
+  ],
+  "author": "Pass the Controller Team",
+  "license": "MIT"
+}
