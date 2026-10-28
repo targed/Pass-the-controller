@@ -70,3 +70,8 @@ desktop.ini
 *.swp
 *.swo
 *~
+
+# SQLite files
+*.db
+*.db-shm
+*.db-wal
