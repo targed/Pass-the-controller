@@ -40,6 +40,11 @@ Pass-the-controller/
 │   # Lead: Luke Kaiser (Platform & DevOps)
 │   # Read: infra/README.md
 │
+├── src/                 # C++ Core & In-Class Activity Models (C++20, CMake)
+│   # Read: docs/cpp-development.md
+│
+├── .devcontainer/       # VS Code Linux Dev Container (Ubuntu 24.04, GCC, Ninja)
+│
 ├── documentation/       # Comprehensive Technical Documentation (Diátaxis)
 └── Docs/                # Capstone Project Proposals, Strategy, & Prototype Images
 ```
@@ -67,6 +72,26 @@ python3 sidecar/agent_mock.py --port 9876
 
 ---
 
+## C++ Class & State In-Class Activity (Dev Container)
+
+This repository includes a standardized VS Code dev container for our C++ class and state machine activities (Ubuntu 24.04, GCC, GDB, CMake, Ninja, C++20).
+
+### Quick Instructions
+1. Open the repository root in VS Code with Docker Desktop running.
+2. Press `F1` (or `Ctrl+Shift+P` / `Cmd+Shift+P`) and select **Dev Containers: Reopen in Container**.
+3. Build and run:
+   - **VS Code UI:** Click **Build** (`F7`) or **Run** (`Shift+F5`) in the bottom status bar.
+   - **Terminal:**
+     ```bash
+     cmake -B build -G Ninja
+     cmake --build build
+     ./build/app
+     ```
+
+For full details on project setup, adding new classes, and updating `CMakeLists.txt`, see the [C++ Development Guide](docs/cpp-development.md).
+
+---
+
 ## Running Automated Tests
 ```bash
 # Python backend & sidecar tests
@@ -80,6 +105,7 @@ cd client && npm run build
 ---
 
 ## Documentation
+* [C++ Dev Container & Build Guide](docs/cpp-development.md)
 * **[Getting Started Tutorial](file:///home/targed/Documents/Git/Pass-the-controller/documentation/tutorials/getting-started.md)**
 * **[Developer Workflows & How-To Guides](file:///home/targed/Documents/Git/Pass-the-controller/documentation/how-to/developer-workflows.md)**
 * **[Architecture & Protocol Reference](file:///home/targed/Documents/Git/Pass-the-controller/documentation/reference/architecture-and-specs.md)**
