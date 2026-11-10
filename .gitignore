@@ -70,3 +70,8 @@ desktop.ini
 *.swp
 *.swo
 *~
+
+# C++ and container artifacts
+.cache/
+compile_commands.json
+.superpowers/
