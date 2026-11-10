@@ -1,10 +1,18 @@
+html {
+	height: 100%;
+	background: linear-gradient(#3a2791, #12114b);
+}
 body {
 	text-align: center;
 }
+#title {
+	color: #ee9fff;
+}
 .main-option {
-	display: block;
+	display: block; /* Doesn't seem to make the divs block-type display: only works when attributed to the buttons themselves. Look more into this. */
 	margin-left: auto;
 	margin-right: auto;
+	margin-bottom: 20px;
 }
 #logo {
 	margin-top: 300px;
