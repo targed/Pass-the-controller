@@ -1,0 +1,6 @@
+*.cpp text eol=lf
+.gitignore text eol=lf
+.gitattributes text eol=lf
+*.txt text eol=lf
+*.md text eol=lf
+*.json text eol=lf
