@@ -41,7 +41,7 @@ Pass-the-controller/
 │   # Read: infra/README.md
 │
 ├── src/                 # C++ Core & In-Class Activity Models (C++20, CMake)
-│   # Read: docs/cpp-development.md
+│   # Read: Docs/cpp-development.md
 │
 ├── .devcontainer/       # VS Code Linux Dev Container (Ubuntu 24.04, GCC, Ninja)
 │
@@ -88,7 +88,7 @@ This repository includes a standardized VS Code dev container for our C++ class 
      ./build/app
      ```
 
-For full details on project setup, adding new classes, and updating `CMakeLists.txt`, see the [C++ Development Guide](docs/cpp-development.md).
+For full details on project setup, adding new classes, and updating `CMakeLists.txt`, see the [C++ Development Guide](Docs/cpp-development.md).
 
 ---
 
@@ -105,7 +105,7 @@ cd client && npm run build
 ---
 
 ## Documentation
-* [C++ Dev Container & Build Guide](docs/cpp-development.md)
+* [C++ Dev Container & Build Guide](Docs/cpp-development.md)
 * **[Getting Started Tutorial](file:///home/targed/Documents/Git/Pass-the-controller/documentation/tutorials/getting-started.md)**
 * **[Developer Workflows & How-To Guides](file:///home/targed/Documents/Git/Pass-the-controller/documentation/how-to/developer-workflows.md)**
 * **[Architecture & Protocol Reference](file:///home/targed/Documents/Git/Pass-the-controller/documentation/reference/architecture-and-specs.md)**
