@@ -8,12 +8,30 @@ body {
 #title {
 	color: #ee9fff;
 }
-.main-option {
-	display: block; /* Doesn't seem to make the divs block-type display: only works when attributed to the buttons themselves. Look more into this. */
+#profile-button {
+}
+.main-buttons {
+	display: block;
 	margin-left: auto;
 	margin-right: auto;
 	margin-bottom: 20px;
 }
 #logo {
 	margin-top: 300px;
+}
+.popup {
+	display: none;
+	justify-content: center;
+	align-items: center;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+.popup-content {
+	background: #ee9fff;
+}
+#room-code:target {
+	display: flex;
 }

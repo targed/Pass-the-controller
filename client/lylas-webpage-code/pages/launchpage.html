@@ -19,22 +19,36 @@
       <!-- TODO: Make buttons redirect to associated pages/open pop-up windows -->
       <!-- note: pop-up windows should not allow user to interact with website behind pop-up until pop-up disappears. -->
       <div id="main-buttons">
-        <button type="button">
-          <div class="main-option">
-            <p>Enter Room Code</p>
-          </div>
-        </button>
-        <button type="button">
-          <div class="main-option">
+        <div id="enter-room-code" class="main-option">
+          <a href="#room-code">
+            <button type="button">
+              <p>Enter Room Code</p>
+            </button>
+          </a>
+        </div>
+        <div id="discover-rooms" class="main-option">
+          <button type="button">
             <p>Discover Rooms</p>
-          </div>
-        </button>
-        <button type="button">
-          <div class="main-option">
+          </button>
+        </div>
+        <div id="create-room" class="main-option">
+          <button type="button">
             <p>Create Room</p>
-          </div>
-        </button>
+          </button>
+        </div>
       </div>
     </main>
+    <!-- popups -->
+    <!-- room code -->
+    <div id="room-code" class="popup">
+      <div class="popup-content">
+        <h3>Create Room +</h3>
+        <input type="checkbox" id="public" name="public"/>
+        <label for="public">Publicly Discoverable</label>
+        <p>
+          <a href="#">Close</a>
+        </p>
+      </div>
+    </div>
   </body>
 </html>
