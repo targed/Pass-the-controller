@@ -1,123 +1,67 @@
-# Pass the Controller
+# C++ Class & State Diagram Modeling Activity
 
-> **Social Game Streaming & Virtual Controller Passing Platform**  
-> Computer Science Senior Capstone Project • Team Repository
-
----
-
-## About the Project
-**Pass the Controller** is a desktop social gaming platform designed to recreate the couch co-op experience of playing a game with friends in the same room and taking turns by "passing the controller."
-
-The application enables remote game streaming combined with a real-time virtual controller token passing engine, spectator queue, text channels, and low-latency voice.
+This repository branch contains the C++ starter project and Linux Dev Container for our group activity translating class and state diagrams into working C++ code.
 
 ---
 
-## Repository Branches: How We Work Together
-To ensure that all 6 team members can collaborate, learn, and contribute meaningfully to our capstone grading:
+## Quickstart
 
-* **`main` (You are here):** The collaborative project foundation. It contains the monorepo architecture, runnable starter templates, protocol contracts, and component README guides for each sub-team to build upon.
-* **`playground` (`git checkout playground`):** Preserves the team's initial verified end-to-end proof-of-concept. Team members can consult this branch at any time for working code patterns, driver logic, and reference implementations.
+### Prerequisites
+1. Install [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows or macOS) or Docker Engine (Linux).
+2. Install [Visual Studio Code](https://code.visualstudio.com/).
+3. Install the **Dev Containers** extension (`ms-vscode-remote.remote-containers`) in VS Code.
+
+### Launching the Dev Container
+1. Open this repository folder in VS Code.
+2. When prompted with "Reopen in Container", click it. Alternatively, press `F1`, type `Dev Containers: Reopen in Container`, and press Enter.
+3. VS Code will load the Ubuntu 24.04 environment pre-configured with GCC, GDB, CMake, Ninja, and CMake Tools.
 
 ---
 
-## Architecture & Component Ownership
+## Building and Running
+
+### Option 1: VS Code CMake Tools (Status Bar)
+* **Build:** Click **Build** on the bottom status bar or press `F7`.
+* **Run:** Click the **Play** icon on the bottom status bar or press `Shift+F5`.
+* **Debug:** Press `F5` to start interactive debugging with GDB.
+
+### Option 2: Terminal (Inside the Container)
+Open a terminal in VS Code inside the container (`Ctrl+\``):
+```bash
+cmake -B build -G Ninja
+cmake --build build
+./build/app
+```
+
+---
+
+## Project Structure
 
 ```
 Pass-the-controller/
-├── client/              # Desktop App (Electron + React 19 + TypeScript)
-│   # Leads: Lyla Graham (UI/UX) & Simon Leeker (WebRTC Media)
-│   # Read: client/README.md
-│
-├── signaling/           # WebRTC Signaling & Room State (FastAPI + WebSockets)
-│   # Leads: Michael Allen (Backend) & Simon Leeker (Networking)
-│   # Read: signaling/README.md
-│
-├── sidecar/             # Native Gamepad Driver Micro-Daemon
-│   # Leads: Sam Hajdukiewicz (Host Engine) & Joshua Dobbs (QA/Testing)
-│   # Read: sidecar/README.md
-│
-├── infra/               # Local Docker Infrastructure (Signaling + Coturn STUN/TURN)
-│   # Lead: Luke Kaiser (Platform & DevOps)
-│   # Read: infra/README.md
-│
-├── src/                 # C++ Core & In-Class Activity Models (C++20, CMake)
-│   # Read: Docs/cpp-development.md
-│
-├── .devcontainer/       # VS Code Linux Dev Container (Ubuntu 24.04, GCC, Ninja)
-│
-├── documentation/       # Comprehensive Technical Documentation (Diátaxis)
-└── Docs/                # Capstone Project Proposals, Strategy, & Prototype Images
+├── .devcontainer/
+│   └── devcontainer.json   # Ubuntu 24.04 C++ Dev Container definition
+├── src/
+│   └── main.cpp            # Starter application and state model
+├── Docs/
+│   ├── cpp-development.md  # Detailed developer guide and workflow
+│   └── superpowers/        # Design specifications and implementation plans
+├── CMakeLists.txt          # CMake build configuration (C++20)
+└── README.md               # This file
 ```
 
 ---
 
-## Quickstart for Team Members
+## Adding New Classes and State Models
 
-### 1. Boot Backend Infrastructure
-```bash
-docker compose -f infra/docker-compose.yml up -d
-```
+1. Place your C++ header files (`.hpp`) and implementation files (`.cpp`) in the `src/` directory.
+2. Open `CMakeLists.txt` and add your `.cpp` files to the `SOURCES` list:
+   ```cmake
+   set(SOURCES
+       src/main.cpp
+       src/your_class.cpp
+   )
+   ```
+3. Re-run your build using `F7` or `cmake --build build`.
 
-### 2. Launch the Desktop Client
-```bash
-cd client
-npm install
-npm run dev
-```
-
-### 3. Start the Input Sidecar (Mock Mode)
-```bash
-python3 sidecar/agent_mock.py --port 9876
-```
-
----
-
-## C++ Class & State In-Class Activity (Dev Container)
-
-This repository includes a standardized VS Code dev container for our C++ class and state machine activities (Ubuntu 24.04, GCC, GDB, CMake, Ninja, C++20).
-
-### Quick Instructions
-1. Open the repository root in VS Code with Docker Desktop running.
-2. Press `F1` (or `Ctrl+Shift+P` / `Cmd+Shift+P`) and select **Dev Containers: Reopen in Container**.
-3. Build and run:
-   - **VS Code UI:** Click **Build** (`F7`) or **Run** (`Shift+F5`) in the bottom status bar.
-   - **Terminal:**
-     ```bash
-     cmake -B build -G Ninja
-     cmake --build build
-     ./build/app
-     ```
-
-For full details on project setup, adding new classes, and updating `CMakeLists.txt`, see the [C++ Development Guide](Docs/cpp-development.md).
-
----
-
-## Running Automated Tests
-```bash
-# Python backend & sidecar tests
-PYTHONPATH=signaling pytest signaling/tests -v
-pytest sidecar/tests -v
-
-# Client TypeScript typecheck & production build
-cd client && npm run build
-```
-
----
-
-## Documentation
-* [C++ Dev Container & Build Guide](Docs/cpp-development.md)
-* **[Getting Started Tutorial](file:///home/targed/Documents/Git/Pass-the-controller/documentation/tutorials/getting-started.md)**
-* **[Developer Workflows & How-To Guides](file:///home/targed/Documents/Git/Pass-the-controller/documentation/how-to/developer-workflows.md)**
-* **[Architecture & Protocol Reference](file:///home/targed/Documents/Git/Pass-the-controller/documentation/reference/architecture-and-specs.md)**
-* **[Project Status & Roadmap](file:///home/targed/Documents/Git/Pass-the-controller/documentation/explanation/project-status-and-roadmap.md)**
-* **[Platform Architecture Strategy](file:///home/targed/Documents/Git/Pass-the-controller/Docs/Platform%20and%20Developer%20Experience%20Strategy.md)**
-
----
-
-## The Capstone Team
-* **Luke Kaiser:** DevOps, Infrastructure, Platform & DevX Lead
-* **Lyla Graham:** Frontend Developer & UI/UX Lead
-* **Simon Leeker:** Networking & Distributed Protocols Lead
-* **Michael Allen:** Product Owner & Backend/Signaling Lead
-* **Sam Hajdukiewicz:** System Architect & Host Input Engine Lead
-* **Joshua Dobbs:** QA, Testing & Multi-OS Client Lead
+For more details, see the [C++ Development Guide](Docs/cpp-development.md).
