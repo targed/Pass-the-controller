@@ -90,7 +90,7 @@ void Room_Status::newEvent(RoomEvent event)
             else
             {
                     
-                std::clog << "ERROR: CURRENT STATE HAS NOT TRANSITION FOR THIS EVENT" << std::endl;
+                std::clog << "ERROR: CURRENT STATE HAS NO TRANSITION FOR THIS EVENT" << std::endl;
             }
             break;
         }
@@ -104,7 +104,7 @@ void Room_Status::newEvent(RoomEvent event)
             else
             {
                     
-                std::clog << "ERROR: CURRENT STATE HAS NOT TRANSITION FOR THIS EVENT" << std::endl;
+                std::clog << "ERROR: CURRENT STATE HAS NO TRANSITION FOR THIS EVENT" << std::endl;
             }
             break;
         }
@@ -122,7 +122,7 @@ void Room_Status::newEvent(RoomEvent event)
             else
             {
 
-                std::clog << "ERROR: CURRENT STATE HAS NOT TRANSITION FOR THIS EVENT" << std::endl;
+                std::clog << "ERROR: CURRENT STATE HAS NO TRANSITION FOR THIS EVENT" << std::endl;
             }
             break;
         }
@@ -138,7 +138,7 @@ void Room_Status::newEvent(RoomEvent event)
             else
             {
 
-                std::clog << "ERROR: CURRENT STATE HAS NOT TRANSITION FOR THIS EVENT" << std::endl;
+                std::clog << "ERROR: CURRENT STATE HAS NO TRANSITION FOR THIS EVENT" << std::endl;
             }
             break;
         }
@@ -154,7 +154,7 @@ void Room_Status::newEvent(RoomEvent event)
             else
             {
 
-                std::clog << "ERROR: CURRENT STATE HAS NOT TRANSITION FOR THIS EVENT" << std::endl;
+                std::clog << "ERROR: CURRENT STATE HAS NO TRANSITION FOR THIS EVENT" << std::endl;
             }
             break;
         }
@@ -175,7 +175,7 @@ void Room_Status::newEvent(RoomEvent event)
             }
             else
             {
-                 std::clog << "ERROR: CURRENT STATE HAS NOT TRANSITION FOR THIS EVENT" << std::endl;
+                 std::clog << "ERROR: CURRENT STATE HAS NO TRANSITION FOR THIS EVENT" << std::endl;
             }
             break;
         }
@@ -191,7 +191,7 @@ void Room_Status::newEvent(RoomEvent event)
             else
             {
 
-                std::clog << "ERROR: CURRENT STATE HAS NOT TRANSITION FOR THIS EVENT" << std::endl;
+                std::clog << "ERROR: CURRENT STATE HAS NO TRANSITION FOR THIS EVENT" << std::endl;
             }
             break;
         }
@@ -207,7 +207,7 @@ void Room_Status::newEvent(RoomEvent event)
             else
             {
 
-                std::clog << "ERROR: CURRENT STATE HAS NOT TRANSITION FOR THIS EVENT" << std::endl;
+                std::clog << "ERROR: CURRENT STATE HAS NO TRANSITION FOR THIS EVENT" << std::endl;
             }
             break;
         }
