@@ -14,7 +14,7 @@
 
         To input an event:
         status.newEvent(RoomEvent::<name_of_event>);
-        For example: status.newEvent(RoomEvent::Commision);
+        For example: status.newEvent(RoomEvent::Commission);
 
 
         To get the current state:
