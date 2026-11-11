@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <string>
+#include "facility_classes.h"
 using namespace std;
 
 // There's a lot of errors because I'm basing my code off of some unwritten code
@@ -16,7 +17,7 @@ public:
     {
         if (room.getRoomAvailability() == true)
         { 
-            room.setRoomAvailability() = false;
+            room.setRoomAvailability(false);
             // Code/function to then create event request
         }
     }
@@ -30,26 +31,29 @@ public:
         cin >> selection;
 
         switch (selection) {
-            case 1:
+            case 1: {
                 cout << "Enter your new event name. \n";
-                string name = "";
-                cin >> name;
-                request.setEventName(name);
+                string eventName = "";
+                cin >> eventName;
+                request.setEventName(eventName);
                 break;
+            }
             
-            case 2:
+            case 2: {
                 cout << "Enter your new event time. \n";
                 string time = "";
                 cin >> time;
                 request.setEventTime(time);
                 break;
+            }
 
-            case 3:
+            case 3: {
                 cout << "Enter your new event date. \n";
                 string date = "";
                 cin >> date;
                 request.setEventDate(date);
                 break;
+            }
             
             default:
                 cout << "Invalid option. \n";
@@ -98,7 +102,7 @@ class FacilityCoordinator : public EventApprover {
 public:
     int coordinatorId;
 
-    void manageFacility()
+    void manageFacility(vector<Facility>& facilityList)
     {
         // Code to pull up facility list
         cout << "Which facility would you like to manage? Enter a number. \n";
@@ -125,12 +129,13 @@ public:
                     facilityList[selection].setAvailability(false);
                     break;
                 
-                case 3:
+                case 3: {
                     cout << "Enter new facility description. \n";
                     string desc = "";
                     cin >> desc;
                     facilityList[selection].setDescription(desc);
                     break;
+                }
                 
                 case 4:
                     // Code to print facility rooms
@@ -160,8 +165,9 @@ public:
 
     void generateUsageReport() 
     {
+
         cout << "Generating usage report... \n";
-        cout << "Total booked facilities: " << PUTSOMETHINGHERE << "\n";
+        cout << "Total booked facilities: " <<"\n";
         cout << "Total booked rooms: " << "\n";
         cout << "Total active events: ";
         cout << "Total declined events: ";
@@ -180,6 +186,10 @@ public:
     
     void setEventName(string newName) {
         eventName = newName;
+    }
+
+    void setEventTime(string newTime) {
+        eventName = newTime;
     }
 
     void setEventDate(string newDate) {
