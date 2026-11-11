@@ -171,37 +171,36 @@ public:
 
 class Request {
 public:
-
-    string Room_Name;
-    int Room_Number;
-    string Event_Name;
-    string Event_Time;
-    string Event_Date;
-    bool Status;
+    string roomName;
+    int roomNumber;
+    string eventName;
+    string eventTime;
+    string eventDate;
+    bool status;
     
-    void setEventName(string New_Name) {
-        Event_Name = New_Name;
+    void setEventName(string newName) {
+        eventName = newName;
     }
 
-    void setEventDate(string New_Date) {
-        Event_Date = New_Date;
+    void setEventDate(string newDate) {
+        eventDate = newDate;
     }
 
-    void setStatus(bool New_Status) 
+    void setStatus(bool newStatus) 
     {
-        Status = New_Status;
+        status = newStatus;
     }
 
-    void request_special_equipment() {
+    void requestSpecialEquipment() {
         cout << "Equipment requested!" << endl;
     }
 
-    void request_security() 
+    void requestSecurity() 
     {
         cout << "Security requested!" << endl;
     }
 
-    void request_event_support() 
+    void requestEventSupport() 
     {
         cout << "Support requested!" << endl;
     }
