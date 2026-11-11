@@ -168,3 +168,42 @@ public:
         cout << "Total users: ";
     }
 };
+
+class Request {
+public:
+
+    string Room_Name;
+    int Room_Number;
+    string Event_Name;
+    string Event_Time;
+    string Event_Date;
+    bool Status;
+    
+    void setEventName(string New_Name) {
+        Event_Name = New_Name;
+    }
+
+    void setEventDate(string New_Date) {
+        Event_Date = New_Date;
+    }
+
+    void setStatus(bool New_Status) 
+    {
+        Status = New_Status;
+    }
+
+    void request_special_equipment() {
+        cout << "Equipment requested!" << endl;
+    }
+
+    void request_security() 
+    {
+        cout << "Security requested!" << endl;
+    }
+
+    void request_event_support() 
+    {
+        cout << "Support requested!" << endl;
+    }
+
+};
