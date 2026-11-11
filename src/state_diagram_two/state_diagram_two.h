@@ -1,5 +1,5 @@
-#ifndef STATE_DIAGRAM_H
-#define STATE_DIAGRAM_H
+#ifndef STATE_DIAGRAM_TWO_H
+#define STATE_DIAGRAM_TWO_H
 #include <string>
 
 /*

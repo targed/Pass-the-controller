@@ -1,0 +1,4 @@
+#ifndef STATE_DIAGRAM_ONE_H
+#define STATE_DIAGRAM_ONE_H
+
+#endif
