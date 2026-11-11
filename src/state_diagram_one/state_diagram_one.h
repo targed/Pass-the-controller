@@ -21,6 +21,7 @@ enum class Event {
     routeToApprover,
     reject,
     evaluateEvent,
+    approve,
     requestRevision,
     securityCleared,
     cancelRequest,
@@ -34,7 +35,7 @@ class Reservation_Request {
     public:
         static Reservation_Request & getInstance();
 
-        void newEvent();
+        void newEvent(Event event);
 
         std::string getState();
 };
