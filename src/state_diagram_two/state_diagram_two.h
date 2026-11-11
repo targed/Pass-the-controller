@@ -27,7 +27,7 @@
  enum class RoomState {
         Start,
         Avaliable,
-        TenativlyHeld,
+        TentativelyHeld,
         Reserved,
         InUse,
         Maintenance,

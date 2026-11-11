@@ -30,9 +30,9 @@ std::string Room_Status::getState()
         }
         break;
            
-        case RoomState::TenativlyHeld:
+        case RoomState::TentativelyHeld:
         {
-            return "TenativlyHeld";
+            return "TentativelyHeld";
         }
         break;
 
@@ -98,8 +98,8 @@ void Room_Status::newEvent(RoomEvent event)
         case RoomEvent::Requested:
         {   if (current_state == RoomState::Avaliable)
             {
-                current_state = RoomState::TenativlyHeld;
-                std::clog << "SUCCESS: CURRENT_STATUS = TENATIVLY_HELD" << std::endl;
+                current_state = RoomState::TentativelyHeld;
+                std::clog << "SUCCESS: CURRENT_STATUS = TENTATIVELY_HELD" << std::endl;
             }
             else
             {
@@ -114,7 +114,7 @@ void Room_Status::newEvent(RoomEvent event)
 
         case RoomEvent::Approved:
         {
-            if (current_state == RoomState::TenativlyHeld)
+            if (current_state == RoomState::TentativelyHeld)
             {
                 current_state = RoomState::Reserved;
                 std::clog << "SUCCESS: CURRENT_STATUS = RESERVED" << std::endl;
@@ -130,7 +130,7 @@ void Room_Status::newEvent(RoomEvent event)
 
         case RoomEvent::Timeout:
         {
-            if (current_state == RoomState::TenativlyHeld)
+            if (current_state == RoomState::TentativelyHeld)
             {
                 current_state = RoomState::Avaliable;
                 std::clog << "SUCCESS: CURRENT_STATUS = AVALIABLE" << std::endl;
