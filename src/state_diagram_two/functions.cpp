@@ -1,6 +1,10 @@
 #include <iostream>
+#include <string>
 #include "state_diagram_two.h"
 
+
+
+// Creates the singleton instance
 Room_Status& Room_Status::getInstance() {
     static Room_Status instance;
     return instance;
@@ -8,6 +12,71 @@ Room_Status& Room_Status::getInstance() {
 
 
 
+
+// Reads the current enum state and outputs a matching string
+std::string Room_Status::getState()
+{
+    switch(current_state)
+    {
+        case RoomState::Start:
+        {
+            return "Start";
+        }
+        break;
+
+        case RoomState::Avaliable:
+        {
+            return "Avaliable";
+        }
+        break;
+           
+        case RoomState::TenativlyHeld:
+        {
+            return "TenativlyHeld";
+        }
+        break;
+
+        case RoomState::Reserved:
+        {
+            return "Reserved";
+        }
+        break;
+
+        case RoomState::InUse:
+        {
+            return "InUse";
+        }
+        break;
+
+        case RoomState::Maintenance:
+        {
+            return "Maintenance";
+        }
+        break;
+        
+        case RoomState::Blackout:
+        {
+            return "Blackout";
+        }
+        break;
+
+        case RoomState::Final:
+        {
+            return "Final";
+        }
+        break;
+
+        default:
+            return "INVALID";
+    }
+}
+
+
+
+
+// Performs the state/transition logic of the state machine
+// If an event is impossible from the current state, the state machine will remain in the current state
+// If an event is possible from the current state, current state is updated accordingly
 void Room_Status::newEvent(RoomEvent event)
 {
     switch (event)
@@ -144,8 +213,8 @@ void Room_Status::newEvent(RoomEvent event)
         }
 
         
-    
         default:
+            std::clog << "ERROR: INVALID EVENT" << std::endl;
             break;
     }
 }
