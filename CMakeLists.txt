@@ -9,7 +9,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(SOURCES
     src/main.cpp
     src/state_diagram_two/functions.cpp
-    
+    src/state_diagram_one/functions.cpp   
 )
 
 add_executable(app ${SOURCES})
