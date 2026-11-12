@@ -40,6 +40,7 @@ std::vector<Facility> createTestData() {
 
 
     std::vector<Facility> listOfFacilities = {bigFacility, smallFacility};
+    return listOfFacilities;
 
     StaffMember user;
     user.name = "Benny";
