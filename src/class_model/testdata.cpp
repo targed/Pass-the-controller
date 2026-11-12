@@ -1,7 +1,8 @@
 #include "user_classes.h"
 #include "facility_classes.h"
+#include "testdata.h"
 
-int main() {
+std::vector<Facility> createTestData() {
     // Test data
     Room bigRoom;
     bigRoom.roomName = "Big Room";
@@ -22,7 +23,7 @@ int main() {
     smallRoom.roomName = "Small Room";
     smallRoom.roomNumber = 4;
     smallRoom.capacity = 40;
-    
+
     Facility bigFacility;
     bigFacility.facilityName = "Big Facility";
     bigFacility.address = "123 Main St.";
@@ -40,8 +41,32 @@ int main() {
 
     std::vector<Facility> listOfFacilities = {bigFacility, smallFacility};
 
-    return 0;
+    StaffMember user;
+    user.name = "Benny";
+    user.userId = 1;
+    user.email = "benny@gmail.com";
+    user.jobTitle = "Janitor";
+    user.isStudent = false;
+    user.organization = "None";
+    user.email_list.push_back(user.email);
+
+    SystemAdministrator admin;
+    admin.name = "Woody";
+    admin.adminId = 1;
+    admin.email = "woody@gamil.com";
+
+    EventApprover approver;
+    approver.name = "Larry";
+    approver.approverId = 1;
+    approver.email = "larry@gmail.com";
+
+    FacilityCoordinator coordinator;
+    coordinator.name = "Terry";
+    coordinator.userId = 2;
+    coordinator.approverId = 2;
+    coordinator.email = "terry@gmail.com";
 }
+
 
 std::string roomName;
     int roomNumber = 0;

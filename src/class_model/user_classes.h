@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include "facility_classes.h"
+#include <vector>
 using namespace std;
 
 // There's a lot of errors because I'm basing my code off of some unwritten code
@@ -12,6 +13,12 @@ public:
     int userId;
     string name;
     string email;
+
+    vector<string> email_list;
+
+    User() {
+        email_list.reserve(10);
+    }
 
     void reserveRoom(Room& room)
     {
@@ -63,6 +70,39 @@ public:
     void cancelRoomRequest(Request& request) 
     {
         request.setStatus(false);
+    }
+    void login()
+    {
+       
+        bool authorized = false;
+        while(!authorized)
+        {
+            cout << "Please enter your email: ";
+            cin >> email;
+
+            for (int i = 0; i < email_list.size(); i++)
+            {
+                if (email == email_list[i])
+                {
+                    authorized = true;
+                    break;
+                }
+            }
+
+            if (!authorized)
+            {
+                cout << "Invalid Email, please try again" << endl;
+            }
+        }
+    }
+
+
+    void user_register()
+    {
+        string input;
+        cout << "Please enter your name: " << endl;
+        cin >> input;
+        email_list.push_back(input);
     }
 };
 
