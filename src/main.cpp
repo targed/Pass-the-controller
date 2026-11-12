@@ -95,6 +95,10 @@ int main()
             case 1:
             {
                 int roomNum;
+                for (int i = 0; i < facilityList.size(); i++){
+                    facilityList[i].listRooms();
+                }
+               
                 std::cout << "Please enter room number: ";
                 std::cin >> roomNum;
                 Room *room = new Room;

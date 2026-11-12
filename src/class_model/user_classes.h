@@ -220,8 +220,8 @@ public:
         cout << "Generating usage report... \n";
         cout << "Total booked facilities: " <<"\n";
         cout << "Total booked rooms: " << "\n";
-        cout << "Total active events: ";
-        cout << "Total declined events: ";
-        cout << "Total users: ";
+        cout << "Total active events: " << "\n";
+        cout << "Total declined events: " << "\n";
+        cout << "Total users: " << "\n";
     }
 };
