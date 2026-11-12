@@ -48,7 +48,7 @@ std::vector<Facility> createTestData() {
     user.jobTitle = "Janitor";
     user.isStudent = false;
     user.organization = "None";
-    user.email_list.push_back(user.email);
+
 
     SystemAdministrator admin;
     admin.name = "Woody";
