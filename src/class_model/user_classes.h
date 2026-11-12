@@ -3,11 +3,55 @@
 #include <iostream>
 #include <string>
 #include "facility_classes.h"
+#include "state_diagram_one/state_diagram_one.h"
+#include "state_diagram_two/state_diagram_two.h"
 #include <vector>
 using namespace std;
 
 // There's a lot of errors because I'm basing my code off of some unwritten code
 // I'll fix this later
+class Request {
+public:
+    string roomName;
+    int roomNumber;
+    string eventName;
+    string eventTime;
+    string eventDate;
+    bool status;
+    
+    void setEventName(string newName) {
+        eventName = newName;
+    }
+
+    void setEventTime(string newTime) {
+        eventName = newTime;
+    }
+
+    void setEventDate(string newDate) {
+        eventDate = newDate;
+    }
+
+    void setStatus(bool newStatus) 
+    {
+        status = newStatus;
+    }
+
+    void requestSpecialEquipment() {
+        cout << "Equipment requested!" << endl;
+    }
+
+    void requestSecurity() 
+    {
+        cout << "Security requested!" << endl;
+    }
+
+    void requestEventSupport() 
+    {
+        cout << "Support requested!" << endl;
+    }
+
+};
+
 class User {
 public:
     int userId;
@@ -16,12 +60,12 @@ public:
 
   
 
-    User() {
-        email_list.reserve(10);
-    }
+    User() {}
 
     void reserveRoom(Room& room)
     {
+        
+
         if (room.getRoomAvailability() == true)
         { 
             room.setRoomAvailability(false);
@@ -70,16 +114,6 @@ public:
     void cancelRoomRequest(Request& request) 
     {
         request.setStatus(false);
-    }
-    
-
-
-    void user_register()
-    {
-        string input;
-        cout << "Please enter your name: " << endl;
-        cin >> input;
-        email_list.push_back(input);
     }
 };
 
@@ -190,46 +224,4 @@ public:
         cout << "Total declined events: ";
         cout << "Total users: ";
     }
-};
-
-class Request {
-public:
-    string roomName;
-    int roomNumber;
-    string eventName;
-    string eventTime;
-    string eventDate;
-    bool status;
-    
-    void setEventName(string newName) {
-        eventName = newName;
-    }
-
-    void setEventTime(string newTime) {
-        eventName = newTime;
-    }
-
-    void setEventDate(string newDate) {
-        eventDate = newDate;
-    }
-
-    void setStatus(bool newStatus) 
-    {
-        status = newStatus;
-    }
-
-    void requestSpecialEquipment() {
-        cout << "Equipment requested!" << endl;
-    }
-
-    void requestSecurity() 
-    {
-        cout << "Security requested!" << endl;
-    }
-
-    void requestEventSupport() 
-    {
-        cout << "Support requested!" << endl;
-    }
-
 };

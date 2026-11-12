@@ -1,17 +1,19 @@
 #include <iostream>
 #include "state_diagram_one/state_diagram_one.h"
 #include "state_diagram_two/state_diagram_two.h"
-#include "user_classes.h"
-#include "testdata.h"
+#include "class_model/user_classes.h"
+#include "class_model/testdata.h"
+#include <typeinfo>
 
 int main() 
 {
-    User user;
+   // User *user = new SystemAdministrator temp_user;
     EventApprover approver;
     SystemAdministrator admin;
+    User *user = &approver;
     int choice = 0;
     bool choice_made = false;
-    std::vector<std::string> email_list = {"benny@gmail.com", "woody@gamil.com", 
+    std::vector<std::string> email_list = {"benny@gmail.com", "woody@gmail.com", 
         "larry@gmail.com", "terry@gmail.com"}; // Preloaded data
 
     std::string entered_email;
@@ -26,7 +28,7 @@ int main()
         std::cout << "2. Register" << std::endl;
 
 
-        cin >> choice;
+        std::cin >> choice;
 
         if (choice == 1) // User selects login
         {
@@ -34,13 +36,13 @@ int main()
             bool authorized = false;
             while(!authorized)
             {
-                cout << "Please enter your email: ";
-                cin >> entered_email;
-
+                std::cout << "Please enter your email: " << std::endl;
+                std::getline(std::cin, entered_email);
                 for (int i = 0; i < email_list.size(); i++)
                 {
                     if (entered_email == email_list[i])
                     {
+        
                         authorized = true;
                         break;
                     }
@@ -51,6 +53,8 @@ int main()
                     cout << "Invalid Email, please try again" << endl;
                 }
             }
+
+            
         }
         else if (choice == 2) // User selects regiser, upon creaing their account they will sent back to the login menu and will be required to login with their account
         {
@@ -89,46 +93,52 @@ int main()
 
         switch(choice) {
             case 1:
-                // Reserve a room
+            {
                 int roomNum;
                 std::cout << "Please enter room number: ";
                 std::cin >> roomNum;
-                // TODO: get reference of (pointer to) room object to reserve
-                user.reserveRoom(/* Insert reference to room object here */);
+                Room *room = new Room;
+                // TODO: get room object to reserve
+                user->reserveRoom(*room);
                 break;
+            }
+
             case 2:
-                // Edit Request                
-                user.editRoomRequest(Request newRequest);
+            {
+                // Edit Request
+                Request *req = new Request;
+                user->editRoomRequest(*req);
                 break;
-            case 3:
-                // Cancel Request
-                user.cancelRoomRequest(/* Insert reference to request object */);
-                break;
-            case 4:
-                if (type(EventApprover))
-                {
-                    approver.manageEvent(Request newRequest);
-                }
-                else
-                {
-                    std::cout << "Error: Not authorized for this action"
-                }            
-                    
-                break;
-            case 5:
-                if (type(SystemAdministrator))
-                {
-                    admin.generateUsageReport();
-                }
-                else
-                {
-                    std::cout << "Error: Not authorized for this action"
-                }
+            }
                 
+            case 3:
+            {
+                // Cancel Request
+                Request *req1 = new Request;
+                user->cancelRoomRequest(*req1);
                 break;
+            }
+                
+            case 4:
+            {
+                // Manage Event
+                // approver.manageEvent(/*Request newRequest*/);
+                break;
+            }
+                
+            case 5:
+            {
+                // Generate reports
+                admin.generateUsageReport();
+                break;
+            }
+                
             default:
+            {
                 // none chosen/invalid choice
                 std::cerr << "Error: Invalid option. Please try again.\n" << std::endl;
+            }
+                
         }
         
     } while(1);
