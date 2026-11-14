@@ -8,13 +8,18 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(SOURCES
     src/main.cpp
-    src/state_diagram_two/functions.cpp
-    src/state_diagram_one/functions.cpp
-    src/class_model/testdata.cpp   
 )
 
 add_executable(app ${SOURCES})
 target_include_directories(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+
+if(WIN32)
+    target_link_libraries(app PRIVATE ws2_32)
+endif()
+
+if(UNIX OR LINUX)
+    target_link_libraries(app PRIVATE pthread)
+endif()
 
 if(MSVC)
     target_compile_options(app PRIVATE /W4)
