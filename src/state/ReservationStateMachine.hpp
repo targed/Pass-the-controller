@@ -299,11 +299,8 @@ public:
      */
     TransitionResult reject(domain::Reservation& reservation, const std::string& approverId, const std::string& reason, std::time_t currentTime) {
         domain::ReservationStatus current = reservation.getStatus();
-        if (current == domain::ReservationStatus::Rejected ||
-            current == domain::ReservationStatus::Completed ||
-            current == domain::ReservationStatus::Cancelled ||
-            current == domain::ReservationStatus::Expired) {
-            return {false, "Cannot reject reservation in terminal status: " + domain::reservationStatusToString(current), current, current};
+        if (!canTransition(current, domain::ReservationStatus::Rejected)) {
+            return {false, "Cannot reject reservation in status: " + domain::reservationStatusToString(current), current, current};
         }
 
         reservation.setStatus(domain::ReservationStatus::Rejected);
@@ -324,6 +321,14 @@ public:
         domain::ReservationStatus current = reservation.getStatus();
         if (current != domain::ReservationStatus::Approved) {
             return {false, "Check-in requires Approved state (current: " + domain::reservationStatusToString(current) + ")", current, current};
+        }
+
+        if (facility.getFacilityId() != reservation.getFacilityId()) {
+            return {false, "Facility ID mismatch", current, current};
+        }
+
+        if (facility.getStatus() == domain::RoomStatus::EmergencyHold || facility.getStatus() == domain::RoomStatus::OutOfService) {
+            return {false, "Cannot check into facility under maintenance or emergency lockdown", current, current};
         }
 
         if (currentTime < reservation.getStartTime()) {
@@ -362,7 +367,7 @@ public:
     }
 
     /**
-     * @brief Cancels reservation. Permitted from Submitted, NeedsRevision, Draft, UnderReview.
+     * @brief Cancels reservation. Permitted from Submitted, NeedsRevision, Draft, UnderReview, SecurityReview.
      * From Approved, strictly enforces 24-hour lead time guard.
      */
     TransitionResult cancel(domain::Reservation& reservation, const std::string& userId, std::time_t currentTime) {
@@ -376,7 +381,8 @@ public:
         } else if (current != domain::ReservationStatus::Draft &&
                    current != domain::ReservationStatus::Submitted &&
                    current != domain::ReservationStatus::UnderReview &&
-                   current != domain::ReservationStatus::NeedsRevision) {
+                   current != domain::ReservationStatus::NeedsRevision &&
+                   current != domain::ReservationStatus::SecurityReview) {
             return {false, "Cannot cancel reservation in state: " + domain::reservationStatusToString(current), current, current};
         }
 

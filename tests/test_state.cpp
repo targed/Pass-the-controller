@@ -71,11 +71,37 @@ void testReservationStandardHappyPath() {
     TransitionResult rCheckInEarly = sm.checkIn(res, fac, eventStart - 60);
     assert(rCheckInEarly.success == false); // Too early!
 
+    // Facility ID mismatch guard
+    Facility wrongFac("room-999", "Different Room", "Oak Hall", 100);
+    TransitionResult rMismatch = sm.checkIn(res, wrongFac, eventStart);
+    assert(rMismatch.success == false);
+    assert(rMismatch.message == "Facility ID mismatch");
+
+    // Maintenance / Emergency lockdown guards
+    fac.setStatus(RoomStatus::EmergencyHold);
+    TransitionResult rEmerg = sm.checkIn(res, fac, eventStart);
+    assert(rEmerg.success == false);
+    assert(rEmerg.message == "Cannot check into facility under maintenance or emergency lockdown");
+
+    fac.setStatus(RoomStatus::OutOfService);
+    TransitionResult rOOS = sm.checkIn(res, fac, eventStart);
+    assert(rOOS.success == false);
+    assert(rOOS.message == "Cannot check into facility under maintenance or emergency lockdown");
+
+    // Rejection on Approved must fail
+    TransitionResult rRejectApproved = sm.reject(res, "approver-1", "Rejecting approved", now);
+    assert(rRejectApproved.success == false);
+
+    fac.setStatus(RoomStatus::Setup);
     TransitionResult rCheckIn = sm.checkIn(res, fac, eventStart);
     assert(rCheckIn.success == true);
     assert(res.getStatus() == ReservationStatus::InProgress);
     assert(fac.getStatus() == RoomStatus::Occupied);
     assert(fac.areDoorsLocked() == false);
+
+    // Rejection on InProgress must fail
+    TransitionResult rRejectInProgress = sm.reject(res, "approver-1", "Rejecting in progress", now);
+    assert(rRejectInProgress.success == false);
 
     // 6. Conclude when end time arrives
     TransitionResult rConcludeEarly = sm.conclude(res, fac, eventEnd - 60);
@@ -223,6 +249,16 @@ void testReservationCancellationGuards() {
     TransitionResult rLateCancel = sm.cancel(res3, "user-3", t23HoursBefore);
     assert(rLateCancel.success == false);
     assert(res3.getStatus() == ReservationStatus::Approved); // Kept in Approved
+
+    // Cancellation from SecurityReview
+    Reservation resSec("res-404", "user-4", "room-4", "High Risk Event", "Party", 250, eventStart, eventEnd, now);
+    assert(sm.submit(resSec, true, now).success == true);
+    assert(sm.routeToReview(resSec, now + 30).success == true);
+    assert(sm.evaluateSecurity(resSec).success == true);
+    assert(resSec.getStatus() == ReservationStatus::SecurityReview);
+    TransitionResult rCancelSec = sm.cancel(resSec, "user-4", now + 60);
+    assert(rCancelSec.success == true);
+    assert(resSec.getStatus() == ReservationStatus::Cancelled);
 
     std::cout << "[PASS] testReservationCancellationGuards\n";
 }
@@ -445,6 +481,62 @@ void testFacilityCanTransition() {
     std::cout << "[PASS] testFacilityCanTransition\n";
 }
 
+void testReservationRejectionGuards() {
+    std::cout << "[RUN] testReservationRejectionGuards\n";
+    ReservationStateMachine sm;
+    NotificationService::getInstance().clear();
+
+    std::time_t now = makeLocalTime(2026, 9, 1, 9, 0);
+    std::time_t eventStart = makeLocalTime(2026, 9, 5, 14, 0);
+    std::time_t eventEnd = makeLocalTime(2026, 9, 5, 16, 0);
+
+    // 1. Rejection from Draft
+    Reservation resDraft("res-r1", "user-1", "room-1", "Draft Test", "Meeting", 20, eventStart, eventEnd, now);
+    assert(sm.reject(resDraft, "admin", "Draft rejected", now).success == true);
+    assert(resDraft.getStatus() == ReservationStatus::Rejected);
+
+    // 2. Rejection from Submitted
+    Reservation resSub("res-r2", "user-1", "room-1", "Sub Test", "Meeting", 20, eventStart, eventEnd, now);
+    assert(sm.submit(resSub, true, now).success == true);
+    assert(sm.reject(resSub, "admin", "Submitted rejected", now).success == true);
+    assert(resSub.getStatus() == ReservationStatus::Rejected);
+
+    // 3. Rejection from UnderReview
+    Reservation resRev("res-r3", "user-1", "room-1", "Rev Test", "Meeting", 20, eventStart, eventEnd, now);
+    assert(sm.submit(resRev, true, now).success == true);
+    assert(sm.routeToReview(resRev, now + 10).success == true);
+    assert(sm.reject(resRev, "admin", "UnderReview rejected", now).success == true);
+    assert(resRev.getStatus() == ReservationStatus::Rejected);
+
+    // 4. Rejection from SecurityReview
+    Reservation resSec("res-r4", "user-1", "room-1", "Sec Test", "Meeting", 250, eventStart, eventEnd, now);
+    assert(sm.submit(resSec, true, now).success == true);
+    assert(sm.routeToReview(resSec, now + 10).success == true);
+    assert(sm.evaluateSecurity(resSec).success == true);
+    assert(resSec.getStatus() == ReservationStatus::SecurityReview);
+    assert(sm.reject(resSec, "admin", "SecurityReview rejected", now).success == true);
+    assert(resSec.getStatus() == ReservationStatus::Rejected);
+
+    // 5. Rejection from NeedsRevision
+    Reservation resNeedsRev("res-r5", "user-1", "room-1", "NeedsRev Test", "Meeting", 20, eventStart, eventEnd, now);
+    assert(sm.submit(resNeedsRev, true, now).success == true);
+    assert(sm.routeToReview(resNeedsRev, now + 10).success == true);
+    assert(sm.requestRevision(resNeedsRev, "admin", "Fix info", now + 86400, now + 20).success == true);
+    assert(resNeedsRev.getStatus() == ReservationStatus::NeedsRevision);
+    assert(sm.reject(resNeedsRev, "admin", "NeedsRevision rejected", now).success == true);
+    assert(resNeedsRev.getStatus() == ReservationStatus::Rejected);
+
+    // 6. Rejection from Terminal states must fail
+    assert(sm.reject(resDraft, "admin", "Already rejected", now).success == false);
+
+    // Rejection from Cancelled must fail
+    Reservation resCancel("res-r6", "user-1", "room-1", "Cancel Test", "Meeting", 20, eventStart, eventEnd, now);
+    assert(sm.cancel(resCancel, "user-1", now).success == true);
+    assert(sm.reject(resCancel, "admin", "Cannot reject cancelled", now).success == false);
+
+    std::cout << "[PASS] testReservationRejectionGuards\n";
+}
+
 int main() {
     std::cout << "========================================" << std::endl;
     std::cout << "Starting State Machine Engine Unit Tests" << std::endl;
@@ -454,6 +546,7 @@ int main() {
     testReservationSecurityWorkflow();
     testReservationRevisionAndExpiration();
     testReservationCancellationGuards();
+    testReservationRejectionGuards();
     testReservationHoldBufferExpiry();
     testReservationCanTransition();
 
@@ -463,7 +556,7 @@ int main() {
     testFacilityCanTransition();
 
     std::cout << "========================================" << std::endl;
-    std::cout << "All State Machine Tests Passed (10/10)!" << std::endl;
+    std::cout << "All State Machine Tests Passed (11/11)!" << std::endl;
     std::cout << "========================================" << std::endl;
     return 0;
 }
