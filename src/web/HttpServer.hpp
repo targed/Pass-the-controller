@@ -191,6 +191,106 @@ public:
     // -------------------------------------------------------------------------
 
     /**
+     * @brief Parse raw HTTP request into structured HttpRequest object.
+     * Extracts method, path, query string, query params, headers (lowercase keys,
+     * trimmed whitespace), and request body.
+     */
+    static HttpRequest parseRequest(const std::string& raw) {
+        HttpRequest req;
+        if (raw.empty()) return req;
+
+        size_t firstLineEnd = raw.find("\r\n");
+        size_t headerStart = 0;
+        if (firstLineEnd != std::string::npos) {
+            headerStart = firstLineEnd + 2;
+        } else {
+            firstLineEnd = raw.find('\n');
+            if (firstLineEnd != std::string::npos) {
+                headerStart = firstLineEnd + 1;
+            } else {
+                firstLineEnd = raw.size();
+                headerStart = raw.size();
+            }
+        }
+
+        std::string firstLine = raw.substr(0, firstLineEnd);
+        std::istringstream flss(firstLine);
+        flss >> req.method >> req.rawPath;
+
+        size_t qPos = req.rawPath.find('?');
+        if (qPos != std::string::npos) {
+            req.path = req.rawPath.substr(0, qPos);
+            req.queryString = req.rawPath.substr(qPos + 1);
+            parseQueryString(req.queryString, req.queryParams);
+        } else {
+            req.path = req.rawPath;
+        }
+
+        // Locate end of headers / start of body
+        size_t headersEnd = raw.find("\r\n\r\n");
+        size_t bodyStart = std::string::npos;
+        if (headersEnd != std::string::npos) {
+            bodyStart = headersEnd + 4;
+        } else {
+            headersEnd = raw.find("\n\n");
+            if (headersEnd != std::string::npos) {
+                bodyStart = headersEnd + 2;
+            } else {
+                headersEnd = raw.size();
+            }
+        }
+
+        if (bodyStart != std::string::npos && bodyStart <= raw.size()) {
+            req.body = raw.substr(bodyStart);
+        }
+
+        // Parse HTTP header lines into req.headers[key] = value
+        if (headersEnd > headerStart) {
+            std::string headerSection = raw.substr(headerStart, headersEnd - headerStart);
+            std::istringstream hss(headerSection);
+            std::string line;
+            while (std::getline(hss, line)) {
+                // Trim trailing \r, spaces, tabs
+                while (!line.empty() && (line.back() == '\r' || line.back() == ' ' || line.back() == '\t')) {
+                    line.pop_back();
+                }
+                size_t lStart = line.find_first_not_of(" \t");
+                if (lStart == std::string::npos) continue;
+                line = line.substr(lStart);
+
+                size_t colon = line.find(':');
+                if (colon != std::string::npos) {
+                    std::string key = line.substr(0, colon);
+                    std::string val = line.substr(colon + 1);
+
+                    // Trim key whitespace
+                    while (!key.empty() && (key.back() == ' ' || key.back() == '\t')) key.pop_back();
+                    size_t kStart = key.find_first_not_of(" \t");
+                    if (kStart != std::string::npos) key = key.substr(kStart);
+                    else key.clear();
+
+                    // Convert header key to lowercase
+                    std::transform(key.begin(), key.end(), key.begin(), [](unsigned char c) {
+                        return static_cast<char>(std::tolower(c));
+                    });
+
+                    // Trim value whitespace
+                    while (!val.empty() && (val.back() == ' ' || val.back() == '\t')) val.pop_back();
+                    size_t vStart = val.find_first_not_of(" \t");
+                    if (vStart != std::string::npos) val = val.substr(vStart);
+                    else val.clear();
+
+                    if (!key.empty()) {
+                        req.headers[key] = val;
+                    }
+                }
+            }
+        }
+
+        return req;
+    }
+
+    /**
      * @brief Pure request parser and dispatcher. Takes raw HTTP request text
      * and returns complete HTTP response string (status line, headers, body).
      */
@@ -200,6 +300,23 @@ public:
         // Preflight CORS
         if (req.method == "OPTIONS") {
             return makeResponse(204, "No Content", "text/plain", "");
+        }
+
+        // Validate Content-Length if present in headers
+        auto clIt = req.headers.find("content-length");
+        if (clIt != req.headers.end()) {
+            try {
+                long long cl = std::stoll(clIt->second);
+                constexpr long long MAX_BODY_SIZE = 10 * 1024 * 1024; // 10MB
+                if (cl < 0) {
+                    return jsonResponse("{\"error\": \"Invalid Content-Length\"}", 400, "Bad Request");
+                }
+                if (cl > MAX_BODY_SIZE) {
+                    return jsonResponse("{\"error\": \"Payload Too Large (>10MB)\"}", 413, "Payload Too Large");
+                }
+            } catch (...) {
+                return jsonResponse("{\"error\": \"Invalid Content-Length\"}", 400, "Bad Request");
+            }
         }
 
         // Router
@@ -395,23 +512,66 @@ private:
             buf[bytesRead] = '\0';
             rawReq.append(buf, bytesRead);
 
+            // Locate header delimiter
+            size_t headerEnd = rawReq.find("\r\n\r\n");
+            size_t headerDelim = 4;
+            if (headerEnd == std::string::npos) {
+                headerEnd = rawReq.find("\n\n");
+                headerDelim = 2;
+            }
+
             // Read full body if Content-Length present
-            size_t clPos = rawReq.find("Content-Length: ");
-            if (clPos == std::string::npos) clPos = rawReq.find("content-length: ");
+            size_t clPos = rawReq.find("Content-Length:");
+            if (clPos == std::string::npos) clPos = rawReq.find("content-length:");
+            if (clPos == std::string::npos) {
+                std::string lowerHeaders = rawReq.substr(0, (headerEnd != std::string::npos ? headerEnd : rawReq.size()));
+                for (char& c : lowerHeaders) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+                clPos = lowerHeaders.find("content-length:");
+            }
+
             if (clPos != std::string::npos) {
-                size_t valStart = clPos + 16;
-                size_t lineEnd = rawReq.find("\r\n", valStart);
-                if (lineEnd != std::string::npos) {
-                    int expectedBody = 0;
-                    try { expectedBody = std::stoi(rawReq.substr(valStart, lineEnd - valStart)); } catch (...) {}
-                    size_t headerEnd = rawReq.find("\r\n\r\n");
-                    if (headerEnd != std::string::npos) {
-                        size_t currentBody = rawReq.size() - (headerEnd + 4);
-                        while (currentBody < static_cast<size_t>(expectedBody)) {
-                            int more = ::recv(clientSock, buf, sizeof(buf) - 1, 0);
-                            if (more <= 0) break;
-                            rawReq.append(buf, more);
-                            currentBody += more;
+                size_t colonPos = rawReq.find(':', clPos);
+                if (colonPos != std::string::npos) {
+                    size_t valStart = rawReq.find_first_not_of(" \t", colonPos + 1);
+                    size_t lineEnd = (valStart != std::string::npos) ? rawReq.find_first_of("\r\n", valStart) : std::string::npos;
+                    if (valStart != std::string::npos && lineEnd != std::string::npos) {
+                        long long expectedBody = 0;
+                        bool validCl = false;
+                        try {
+                            std::string lenStr = rawReq.substr(valStart, lineEnd - valStart);
+                            size_t s = lenStr.find_first_not_of(" \t\r\n");
+                            size_t e = lenStr.find_last_not_of(" \t\r\n");
+                            if (s != std::string::npos) {
+                                expectedBody = std::stoll(lenStr.substr(s, e - s + 1));
+                                validCl = true;
+                            }
+                        } catch (...) {
+                            validCl = false;
+                        }
+
+                        // Bounds check Content-Length: clamp/validate (reject negative or > 10MB)
+                        constexpr long long MAX_BODY_SIZE = 10 * 1024 * 1024; // 10MB
+                        if (!validCl || expectedBody < 0 || expectedBody > MAX_BODY_SIZE) {
+                            std::string errResp = (!validCl || expectedBody < 0)
+                                ? makeResponse(400, "Bad Request", "application/json", "{\"error\": \"Invalid Content-Length\"}")
+                                : makeResponse(413, "Payload Too Large", "application/json", "{\"error\": \"Payload Too Large (>10MB)\"}");
+#if defined(_WIN32)
+                            ::send(clientSock, errResp.data(), static_cast<int>(errResp.size()), 0);
+#else
+                            ::send(clientSock, errResp.data(), errResp.size(), 0);
+#endif
+                            closeSocket(clientSock);
+                            return;
+                        }
+
+                        if (headerEnd != std::string::npos) {
+                            size_t currentBody = rawReq.size() - (headerEnd + headerDelim);
+                            while (currentBody < static_cast<size_t>(expectedBody)) {
+                                int more = ::recv(clientSock, buf, sizeof(buf) - 1, 0);
+                                if (more <= 0) break;
+                                rawReq.append(buf, more);
+                                currentBody += more;
+                            }
                         }
                     }
                 }
@@ -431,43 +591,6 @@ private:
     // -------------------------------------------------------------------------
     // Request Parsing & Helpers
     // -------------------------------------------------------------------------
-
-    HttpRequest parseRequest(const std::string& raw) const {
-        HttpRequest req;
-        if (raw.empty()) return req;
-
-        size_t firstLineEnd = raw.find("\r\n");
-        if (firstLineEnd == std::string::npos) {
-            firstLineEnd = raw.find('\n');
-            if (firstLineEnd == std::string::npos) firstLineEnd = raw.size();
-        }
-
-        std::string firstLine = raw.substr(0, firstLineEnd);
-        std::istringstream flss(firstLine);
-        flss >> req.method >> req.rawPath;
-
-        size_t qPos = req.rawPath.find('?');
-        if (qPos != std::string::npos) {
-            req.path = req.rawPath.substr(0, qPos);
-            req.queryString = req.rawPath.substr(qPos + 1);
-            parseQueryString(req.queryString, req.queryParams);
-        } else {
-            req.path = req.rawPath;
-        }
-
-        // Headers
-        size_t headersEnd = raw.find("\r\n\r\n");
-        if (headersEnd != std::string::npos) {
-            req.body = raw.substr(headersEnd + 4);
-        } else {
-            size_t lfEnd = raw.find("\n\n");
-            if (lfEnd != std::string::npos) {
-                req.body = raw.substr(lfEnd + 2);
-            }
-        }
-
-        return req;
-    }
 
     static void parseQueryString(const std::string& qs, std::unordered_map<std::string, std::string>& out) {
         size_t pos = 0;
