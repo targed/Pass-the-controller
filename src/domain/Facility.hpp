@@ -119,6 +119,10 @@ public:
         return status_;
     }
 
+    // Door lock management
+    bool areDoorsLocked() const { return doorsLocked_; }
+    void setDoorsLocked(bool locked) { doorsLocked_ = locked; }
+
     // Equipment capabilities
     bool hasEquipment(std::string_view equipment) const {
         return std::find(supportedEquipment_.begin(), supportedEquipment_.end(), equipment) != supportedEquipment_.end();
@@ -152,6 +156,7 @@ private:
     int capacity_{0};
     double hourlyRate_{0.0};
     RoomStatus status_{RoomStatus::Available};
+    bool doorsLocked_{false};
     std::vector<std::string> supportedEquipment_;
     std::vector<BlackoutWindow> blackoutWindows_;
 };

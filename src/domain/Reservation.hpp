@@ -265,6 +265,12 @@ public:
         approvals_.emplace_back(std::move(appId), std::move(approverId), std::move(decision), std::move(comments));
     }
 
+    void recordApproval(std::string approverId, std::string decision, std::string comments, std::time_t decidedAt) {
+        static std::atomic<uint64_t> appCounter{100};
+        std::string appId = "appr-" + std::to_string(++appCounter);
+        approvals_.emplace_back(std::move(appId), std::move(approverId), std::move(decision), std::move(comments), decidedAt);
+    }
+
     // Accessors
     const std::string& getReservationId() const { return reservationId_; }
     const std::string& getRequesterId() const { return requesterId_; }
@@ -278,6 +284,7 @@ public:
     ReservationStatus getStatus() const { return status_; }
     std::time_t getHoldExpiresAt() const { return holdExpiresAt_; }
     bool getRequiresSecurity() const { return requiresSecurity_; }
+    std::time_t getRevisionDeadline() const { return revisionDeadline_; }
 
     const std::vector<EquipmentRequest>& getEquipmentRequests() const { return equipmentRequests_; }
     std::vector<EquipmentRequest>& getEquipmentRequests() { return equipmentRequests_; }
@@ -310,6 +317,7 @@ public:
     void setStatus(ReservationStatus status) { status_ = status; }
     void setHoldExpiresAt(std::time_t holdExpiresAt) { holdExpiresAt_ = holdExpiresAt; }
     void setRequiresSecurity(bool requiresSecurity) { requiresSecurity_ = requiresSecurity; }
+    void setRevisionDeadline(std::time_t revisionDeadline) { revisionDeadline_ = revisionDeadline; }
 
 private:
     std::string reservationId_;
@@ -324,6 +332,7 @@ private:
     ReservationStatus status_{ReservationStatus::Draft};
     std::time_t holdExpiresAt_{0};
     bool requiresSecurity_{false};
+    std::time_t revisionDeadline_{0};
 
     std::vector<EquipmentRequest> equipmentRequests_;
     std::vector<SupportRequest> supportRequests_;
