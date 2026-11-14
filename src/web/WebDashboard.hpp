@@ -347,7 +347,8 @@ inline constexpr std::string_view DASHBOARD_HTML = R"rawhtml(<!DOCTYPE html>
       position: sticky;
       top: 0;
     }
-
+)rawhtml"
+R"rawhtml(
     .column-count {
       background-color: rgba(255, 255, 255, 0.1);
       padding: 0.15rem 0.45rem;
@@ -702,7 +703,8 @@ inline constexpr std::string_view DASHBOARD_HTML = R"rawhtml(<!DOCTYPE html>
       </div>
     </div>
   </div>
-
+)rawhtml"
+R"rawhtml(
   <!-- Modal: Scenario Output -->
   <div class="modal-backdrop" id="scenarioModal">
     <div class="modal-window" style="max-width: 720px;">
