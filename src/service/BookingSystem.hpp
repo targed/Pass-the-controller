@@ -190,7 +190,9 @@ public:
         }
 
         reservations_.insert_or_assign(resId, std::move(res));
-        reservationOrder_.push_back(resId);
+        if (std::find(reservationOrder_.begin(), reservationOrder_.end(), resId) == reservationOrder_.end()) {
+            reservationOrder_.push_back(resId);
+        }
 
         addAuditLogLocked("Created reservation " + resId + " [Draft] for \"" + eventTitle + "\" in " + facilityId + ".");
         return resId;
@@ -439,7 +441,6 @@ public:
             return {false, "Reservation not found: " + reservationId, domain::ReservationStatus::Draft, domain::ReservationStatus::Draft};
         }
 
-        domain::ReservationStatus prevStatus = resIt->second.getStatus();
         state::TransitionResult res = reservationStateMachine_.cancel(resIt->second, userId, currentTime_);
         if (res.success) {
             auto facIt = facilities_.find(resIt->second.getFacilityId());
@@ -775,6 +776,7 @@ private:
             bool active = (s == domain::ReservationStatus::Submitted ||
                            s == domain::ReservationStatus::UnderReview ||
                            s == domain::ReservationStatus::SecurityReview ||
+                           s == domain::ReservationStatus::NeedsRevision ||
                            s == domain::ReservationStatus::Approved ||
                            s == domain::ReservationStatus::InProgress);
             if (active) {

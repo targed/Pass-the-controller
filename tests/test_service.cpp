@@ -193,6 +193,47 @@ void testScenarioRunnerExecutions() {
     std::cout << "[PASS] testScenarioRunnerExecutions\n";
 }
 
+void testNeedsRevisionConflictAndDeduplication() {
+    std::cout << "[RUN] testNeedsRevisionConflictAndDeduplication\n";
+    BookingSystem sys;
+    std::time_t base = BookingSystem::makeTime(2026, 9, 1, 9, 0, 0);
+    std::time_t start = BookingSystem::makeTime(2026, 9, 5, 14, 0, 0);
+    std::time_t end   = BookingSystem::makeTime(2026, 9, 5, 16, 0, 0);
+    sys.setTime(base);
+
+    // 1. Test deduplication on createReservation (overload 1)
+    std::string id1 = sys.createReservation("USR-001", "FAC-104", "Robotics Meet", "Meeting", 20, start, end, {}, {}, "CUSTOM-1");
+    assert(id1 == "CUSTOM-1");
+    size_t count1 = sys.getReservations().size();
+
+    // Re-create / overwrite with same custom ID
+    std::string id2 = sys.createReservation("USR-001", "FAC-104", "Robotics Meet Updated", "Meeting", 20, start, end, {}, {}, "CUSTOM-1");
+    assert(id2 == "CUSTOM-1");
+    assert(sys.getReservations().size() == count1); // Order vector not duplicated
+
+    // Overload 2 deduplication test
+    domain::Reservation resManual("CUSTOM-2", "USR-001", "FAC-104", "Study", "Meeting", 5, start, end);
+    sys.createReservation(resManual);
+    size_t count2 = sys.getReservations().size();
+    sys.createReservation(resManual);
+    assert(sys.getReservations().size() == count2);
+
+    // 2. Test NeedsRevision conflict blocking
+    // Move CUSTOM-1 to NeedsRevision
+    assert(sys.submitReservation(id1).success);
+    assert(sys.routeToReview(id1).success);
+    assert(sys.requestChanges(id1, "USR-005", "Please add a description", base + 86400).success);
+    assert(sys.getReservation(id1)->getStatus() == ReservationStatus::NeedsRevision);
+
+    // Try submitting an overlapping reservation for FAC-104
+    std::string overlapId = sys.createReservation("USR-002", "FAC-104", "Overlapping Event", "Meeting", 15, start, end);
+    auto submitOverlap = sys.submitReservation(overlapId);
+    assert(!submitOverlap.success); // Must fail due to conflict with NeedsRevision
+    assert(sys.getReservation(overlapId)->getStatus() == ReservationStatus::Draft);
+
+    std::cout << "[PASS] testNeedsRevisionConflictAndDeduplication\n";
+}
+
 int main() {
     std::cout << "========================================\n";
     std::cout << "Starting Service & Scenario Unit Tests\n";
@@ -202,11 +243,12 @@ int main() {
     testSimulatedClock();
     testBookingOperations();
     testEmergencyLockdownOperations();
+    testNeedsRevisionConflictAndDeduplication();
     testJsonSerialization();
     testScenarioRunnerExecutions();
 
     std::cout << "========================================\n";
-    std::cout << "All Service Tests Passed (6/6)!\n";
+    std::cout << "All Service Tests Passed (7/7)!\n";
     std::cout << "========================================\n";
 
     // Now execute verbose scenario output to verify aesthetic terminal formatting
