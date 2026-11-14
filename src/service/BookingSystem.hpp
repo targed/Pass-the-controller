@@ -224,6 +224,7 @@ public:
      */
     state::TransitionResult submitReservation(const std::string& reservationId) {
         std::lock_guard<std::mutex> lock(mutex_);
+        checkExpirationsLocked();
         auto resIt = reservations_.find(reservationId);
         if (resIt == reservations_.end()) {
             return {false, "Reservation not found: " + reservationId, domain::ReservationStatus::Draft, domain::ReservationStatus::Draft};
@@ -357,6 +358,7 @@ public:
      */
     state::TransitionResult resubmitReservation(const std::string& reservationId) {
         std::lock_guard<std::mutex> lock(mutex_);
+        checkExpirationsLocked();
         auto resIt = reservations_.find(reservationId);
         if (resIt == reservations_.end()) {
             return {false, "Reservation not found: " + reservationId, domain::ReservationStatus::Draft, domain::ReservationStatus::Draft};
@@ -773,6 +775,10 @@ private:
             if (other.getFacilityId() != res.getFacilityId()) continue;
 
             auto s = other.getStatus();
+            if (s == domain::ReservationStatus::Submitted && other.getHoldExpiresAt() > 0 && currentTime_ > other.getHoldExpiresAt()) {
+                continue;
+            }
+
             bool active = (s == domain::ReservationStatus::Submitted ||
                            s == domain::ReservationStatus::UnderReview ||
                            s == domain::ReservationStatus::SecurityReview ||

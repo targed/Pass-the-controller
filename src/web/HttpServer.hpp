@@ -490,7 +490,9 @@ private:
 #endif
                 socket_t clientSock = ::accept(serverSock_, reinterpret_cast<sockaddr*>(&clientAddr), &clientLen);
                 if (clientSock != INVALID_SOCK) {
-                    handleClient(clientSock);
+                    std::thread([this, clientSock]() {
+                        handleClient(clientSock);
+                    }).detach();
                 }
             }
         }

@@ -33,7 +33,7 @@ Pass-the-controller/
     │   ├── BookingSystem.hpp           # Central service repository, clock, and transactions
     │   └── ScenarioRunner.hpp          # Automated runners for 6 demonstration scenarios
     ├── test/                           # Automated verification
-    │   └── TestSuite.hpp               # 13-suite test harness with 595 assertions
+    │   └── TestSuite.hpp               # 14-suite test harness with 609 assertions
     └── web/                            # Presentation and network tier
         ├── HttpServer.hpp              # Cross-platform socket HTTP server and REST router
         └── WebDashboard.hpp            # Inlined single-page HTML/CSS/JavaScript dashboard
@@ -54,9 +54,9 @@ Pass-the-controller/
 ### 2.1 User Hierarchy (`domain/User.hpp`)
 All actors inherit from the abstract base class `domain::User`:
 
-* **`User`**: Base class containing `userId`, `fullName`, `email`, `department`, and an authentication token string. Provides virtual methods `getRole()`, `getRoleName()`, and `canExpediteReview()`.
+* **`User`**: Base class containing `userId`, `fullName`, `email`, `department`, and an authentication token string. Provides virtual methods `getRole()`, `getRoleName()`, and `isExpeditedEligible()`.
 * **`StudentOrgRepresentative`**: Associated with an `organizationName`. Restricts concurrent active bookings (default maximum: 5) to prevent room hoarding.
-* **`FacultyStaffMember`**: Associated with an `employeeId` and department. Sets `canExpediteReview()` to `true`, allowing curricular reservations to bypass initial triage queues.
+* **`FacultyStaffMember`**: Associated with an `employeeId` and department. Sets `isExpeditedEligible()` to `true`, allowing curricular reservations to bypass initial triage queues.
 * **`FacilityCoordinator`**: Associated with a list of `assignedBuildings`. Exposes methods to toggle maintenance blackouts, inspect rooms, and certify repairs.
 * **`EventApprover`**: Holds an `approvalTier` integer (Tier 1 for departmental spaces, Tier 2 for campus auditoriums, Tier 3 for executive facilities). Evaluates policy compliance.
 
@@ -71,7 +71,7 @@ Represents physical campus rooms.
   * `Turnover` (4)
   * `OutOfService` (5)
   * `EmergencyHold` (6)
-* **Access Control:** `isSmartDoorLocked()` tracks physical electronic door locks. Doors are unlocked automatically when transitioning to `Occupied` and locked in `Turnover`, `EmergencyHold`, or `OutOfService`.
+* **Access Control:** `areDoorsLocked()` tracks physical electronic door locks. Doors are unlocked automatically when transitioning to `Occupied` and locked in `Turnover`, `EmergencyHold`, or `OutOfService`.
 
 ### 2.3 Reservation Aggregate Root (`domain/Reservation.hpp`)
 Coordinates booking metadata, child entities, and status progression:
@@ -81,7 +81,7 @@ Coordinates booking metadata, child entities, and status progression:
   * **`SupportRequest`:** `requestId`, `supportType` (Custodial, AV, Security), `notes`, `isAssigned`, `assignedOfficerId`.
   * **`Approval`:** `approvalId`, `approverId`, `decision` (Approved, Rejected, ChangesRequested), `comments`, `decidedAt`.
 * **Guards & Helpers:**
-  * `isHighRisk()`: Returns `true` if `expectedAttendance > 100` or if the start time is outside 08:00 to 22:00.
+  * `isHighRisk()`: Returns `true` if `expectedAttendance > 100` or if the start time is outside 08:00 to 20:00.
   * `canCancel(currentTime)`: Returns `true` if current status is prior to `Approved`, or if status is `Approved` and `(startTime - currentTime) >= 86400` (24-hour lead time).
 
 ---
@@ -178,7 +178,7 @@ Example response:
       "capacity": 300,
       "status": "Available",
       "statusCode": 0,
-      "smartDoorLocked": false,
+      "doorsLocked": false,
       "hourlyRate": 150.00
     }
   ],
@@ -287,7 +287,7 @@ The test harness runs without third-party frameworks. It provides:
 * Microsecond execution timing per test case.
 * ANSI colorized pass/fail reports and detailed exception location reporting (`__FILE__`, `__LINE__`).
 
-The 13 suites cover:
+The 14 suites cover:
 1. `testUserHierarchyAndPolymorphism`: Base class dispatch, role names, and quota limits.
 2. `testFacilityOperations`: Availability checking, overlapping time intervals, and door lock states.
 3. `testReservationComposition`: Aggregate root assembly with child equipment and support requests.
@@ -301,6 +301,7 @@ The 13 suites cover:
 11. `testFacilityOperationalCycle`: Staging windows, check-in unlock, and turnover cycles.
 12. `testFacilityMaintenanceAndEmergency`: Damage reporting, repairs certification, and emergency holds.
 13. `testBookingSystemIntegration`: JSON serialization, multi-venue scheduling, and reset logic.
+14. `testWebDashboardAndEndpoints`: Embedded HTTP request routing, static dashboard serving, API state serialization, time advancement, Content-Length bounds validation, and 404 responses.
 
 ### 5.2 Scenario Runner (`service/ScenarioRunner.hpp`)
 The scenario runner executes 6 automated walkthroughs demonstrating core operational workflows:

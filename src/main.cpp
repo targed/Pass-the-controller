@@ -68,7 +68,7 @@ void printHelp(const char* progName) {
               << "                          5   Campus Emergency Lockdown & Restoration\n"
               << "                          6   Cancellation Policy & 24-Hour Lead Time Guard\n"
               << "                          all Run all 6 scenarios in sequence with summary table\n\n"
-              << "  --test                Run the complete 13-suite automated test harness\n"
+              << "  --test                Run the complete 14-suite automated test harness\n"
               << "                        (595+ assertions verifying domain, state engines, services,\n"
               << "                        and web dashboard). Returns exit code 0 on pass, 1 on fail.\n\n"
               << "  --help, -h            Display this comprehensive help message and exit.\n\n"

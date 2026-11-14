@@ -22,6 +22,7 @@
 #include "state/ReservationStateMachine.hpp"
 #include "state/FacilityStateMachine.hpp"
 #include "service/BookingSystem.hpp"
+#include "web/HttpServer.hpp"
 
 namespace smartcampus::test {
 
@@ -1411,6 +1412,56 @@ public:
     }
 
     // -------------------------------------------------------------------------
+    // 14. Embedded Web Dashboard & REST API Endpoints
+    // -------------------------------------------------------------------------
+    void testWebDashboardAndEndpoints() {
+        auto sys = std::make_shared<service::BookingSystem>();
+        smartcampus::web::HttpServer server(sys, 18080);
+
+        // 1. GET / returns 200 with HTML and Content-Type: text/html
+        std::string resHome = server.handleHttpRequest("GET / HTTP/1.1\r\nHost: localhost:18080\r\n\r\n");
+        ASSERT_TRUE(resHome.find("HTTP/1.1 200 OK") != std::string::npos);
+        ASSERT_TRUE(resHome.find("Content-Type: text/html") != std::string::npos);
+        ASSERT_TRUE(resHome.find("<!DOCTYPE html>") != std::string::npos);
+
+        // 2. GET /api/state returns 200 with JSON and Content-Type: application/json
+        std::string resState = server.handleHttpRequest("GET /api/state HTTP/1.1\r\nHost: localhost:18080\r\n\r\n");
+        ASSERT_TRUE(resState.find("HTTP/1.1 200 OK") != std::string::npos);
+        ASSERT_TRUE(resState.find("Content-Type: application/json") != std::string::npos);
+        ASSERT_TRUE(resState.find("\"facilities\"") != std::string::npos);
+        ASSERT_TRUE(resState.find("\"reservations\"") != std::string::npos);
+        ASSERT_TRUE(resState.find("\"currentTime\"") != std::string::npos);
+
+        // 3. POST /api/advance-time advances time
+        std::time_t tBefore = sys->getCurrentTime();
+        std::string resAdv = server.handleHttpRequest(
+            "POST /api/advance-time HTTP/1.1\r\nHost: localhost:18080\r\nContent-Type: application/json\r\nContent-Length: 17\r\n\r\n{\"seconds\": 1800}"
+        );
+        ASSERT_TRUE(resAdv.find("HTTP/1.1 200 OK") != std::string::npos);
+        ASSERT_TRUE(resAdv.find("\"success\": true") != std::string::npos);
+        std::time_t tAfter = sys->getCurrentTime();
+        ASSERT_EQ(tAfter, tBefore + 1800);
+
+        // 4. Negative Content-Length returns 400
+        std::string resNegCl = server.handleHttpRequest(
+            "POST /api/advance-time HTTP/1.1\r\nHost: localhost:18080\r\nContent-Length: -50\r\n\r\n"
+        );
+        ASSERT_TRUE(resNegCl.find("HTTP/1.1 400 Bad Request") != std::string::npos);
+
+        // 5. Content-Length > 10MB returns 413
+        std::string resBigCl = server.handleHttpRequest(
+            "POST /api/advance-time HTTP/1.1\r\nHost: localhost:18080\r\nContent-Length: 15000000\r\n\r\n"
+        );
+        ASSERT_TRUE(resBigCl.find("HTTP/1.1 413 Payload Too Large") != std::string::npos);
+
+        // 6. 404 for unknown route
+        std::string resUnknown = server.handleHttpRequest(
+            "GET /api/unknown-endpoint HTTP/1.1\r\nHost: localhost:18080\r\n\r\n"
+        );
+        ASSERT_TRUE(resUnknown.find("HTTP/1.1 404 Not Found") != std::string::npos);
+    }
+
+    // -------------------------------------------------------------------------
     // Self-Test for Assertion Macros
     // -------------------------------------------------------------------------
     void testAssertionMacros() {
@@ -1455,7 +1506,8 @@ public:
             {"testInvalidReservationTransitions",     &TestSuite::testInvalidReservationTransitions},
             {"testFacilityOperationalCycle",          &TestSuite::testFacilityOperationalCycle},
             {"testFacilityMaintenanceAndEmergency",   &TestSuite::testFacilityMaintenanceAndEmergency},
-            {"testBookingSystemIntegration",          &TestSuite::testBookingSystemIntegration}
+            {"testBookingSystemIntegration",          &TestSuite::testBookingSystemIntegration},
+            {"testWebDashboardAndEndpoints",          &TestSuite::testWebDashboardAndEndpoints}
         };
 
         if (verbose) {

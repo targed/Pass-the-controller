@@ -26,3 +26,8 @@ if(MSVC)
 else()
     target_compile_options(app PRIVATE -Wall -Wextra -Wpedantic)
 endif()
+
+enable_testing()
+add_test(NAME UnitAndStateTests COMMAND app --test)
+add_test(NAME Scenarios COMMAND app --scenario all)
+
