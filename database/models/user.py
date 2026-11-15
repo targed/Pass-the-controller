@@ -30,7 +30,7 @@ class User(Base):
     )
 
     last_name: Mapped[str] = mapped_column(
-        String(20)
-        CheckConstraint("length(last_name) BETWEEN 1 AND 20")
+        String(20),
+        CheckConstraint("length(last_name) BETWEEN 1 AND 20"),
         nullable = False
     )
