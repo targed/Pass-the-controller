@@ -1,15 +1,15 @@
-from sqlalchemy import String, LargeBinary, CheckConstraint
+from sqlalchemy import String, Integer, LargeBinary, CheckConstraint, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 from database.base import Base
 
 # User Settings table
-class User_Settings(Base):
+class UserSettings(Base):
     __tablename__ = "USER_SETTINGS"
 
     user_id: Mapped[str] = mapped_column(
         String,
+        ForeignKey("USER.user_id"),
         primary_key = True,
-        foreign_keys("USER.user_id"),
         nullable = False
     )
 
@@ -23,9 +23,9 @@ class User_Settings(Base):
         nullable = True
     )
 
-    notification_perfs: Mapped[int] = mapped_column(
+    notification_prefs: Mapped[int] = mapped_column(
         Integer,
-        CheckConstraint("notification_perfs == 0 OR notification_perfs == 1"),
+        CheckConstraint("notification_prefs == 0 OR notification_prefs == 1"),
         nullable = False
     )
 

@@ -14,7 +14,7 @@ db_url = URL.create(drivername = "sqlite", database=str(db_path))
 
 
 # Create the SQLite database engine according to the database file location
-db_engine = create_engine(db_url)
+engine = create_engine(db_url)
 
 # SQLite by default doesn't enforce foreign key contraints, this function handles that upon creating an engine
 @event.listens_for(engine, "connect")
