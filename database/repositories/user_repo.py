@@ -4,6 +4,7 @@ from database.models.user import User
 from database.models.user_settings import UserSettings
 from database.repositories.user_settings_repo import UserSettingsRepo
 from database.models.known_peer import KnownPeer
+from database.models.host_ban import HostBan
 
 # Later optimizations: 
 # - user_create should call the functions for creating the key and password hash as a user should have those upon creation. More convenient if whole thing happens in one go
@@ -57,7 +58,7 @@ class UserRepo:
         local_user = session.scalar(query)
         
         if local_user is None:
-            return
+            raise ValueError("ERROR: update_local_id() FAILED, user does not exist")
         
 
         local_user.user_id = new_user_id
@@ -70,7 +71,7 @@ class UserRepo:
         local_user = session.scalar(query)
         
         if local_user is None:
-            return
+            raise ValueError("ERROR: update_local_publicKey() FAILED, user does not exist")
         
 
         local_user.public_key = newPublicKey
@@ -83,7 +84,7 @@ class UserRepo:
         local_user = session.scalar(query)
         
         if local_user is None:
-            return
+            raise ValueError("ERROR: update_local_passwordHash() FAILED, user does not exist")
         
 
         local_user.password_hash = newPasswordHash
@@ -97,7 +98,7 @@ class UserRepo:
         local_user = session.scalar(query)
         
         if local_user is None:
-            return
+            raise ValueError("ERROR: update_local_firstName() FAILED, user does not exist")
         
 
         local_user.first_name = newFirstName
@@ -110,7 +111,7 @@ class UserRepo:
         local_user = session.scalar(query)
         
         if local_user is None:
-            return
+            raise ValueError("ERROR: update_local_lastName() FAILED, user does not exist")
         
 
         local_user.last_name = newLastName
@@ -124,24 +125,30 @@ class UserRepo:
     #  Not only deletes user but it's child tables as well
     def delete_user(self, session: Session) -> bool:
 
-
-    
         query_for_user = select(User)
         query_for_settings = select(UserSettings)
         
         local_user = session.scalars(query_for_user).first()
+
+        if local_user is None:
+            raise ValueError("ERROR: update_local_id() FAILED, user does not exist")
+
+
         local_settings = session.scalars(query_for_settings).first()
 
-        if local_user is None or local_settings is None:
-            return False
-
-
+        # Anytime a table has multiple users, we must collect all entries and use loops to delete each tuple one-by-one
         local_knownPeers = session.scalars(select(KnownPeer).where(KnownPeer.owner_user_id == local_user.user_id)).all()
+        local_bans = session.scalars(select(HostBan)).all()
 
-        # Find the known peer that matches the user on track to being deleted
+        
         
         # Remove child tables first
-        session.delete(local_settings)
+        if local_settings is not None:
+            session.delete(local_settings)
+
+        # Remove all user's from ban list
+        for peer in local_bans:
+            session.delete(peer)
 
         # Find the known peer that matches the user on track to being deleted
         for peer in local_knownPeers:
