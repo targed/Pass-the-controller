@@ -56,7 +56,7 @@ class HostBanRepo:
 
 
         if why_banned is None:
-            raise ValueError("ERROR: update_bannedReason() FAILED, peer public key does not exist")
+            return False
 
         
         why_banned.ban_reason = newReason

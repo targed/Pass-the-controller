@@ -98,7 +98,7 @@ class UserRepo:
         local_user = session.scalar(query)
         
         if local_user is None:
-            raise ValueError("ERROR: update_local_firstName() FAILED, user does not exist")
+           return None
         
 
         local_user.first_name = newFirstName
@@ -111,7 +111,7 @@ class UserRepo:
         local_user = session.scalar(query)
         
         if local_user is None:
-            raise ValueError("ERROR: update_local_lastName() FAILED, user does not exist")
+            return None
         
 
         local_user.last_name = newLastName
@@ -131,7 +131,7 @@ class UserRepo:
         local_user = session.scalars(query_for_user).first()
 
         if local_user is None:
-            raise ValueError("ERROR: update_local_id() FAILED, user does not exist")
+            return False
 
 
         local_settings = session.scalars(query_for_settings).first()
@@ -139,6 +139,7 @@ class UserRepo:
         # Anytime a table has multiple users, we must collect all entries and use loops to delete each tuple one-by-one
         local_knownPeers = session.scalars(select(KnownPeer).where(KnownPeer.owner_user_id == local_user.user_id)).all()
         local_bans = session.scalars(select(HostBan)).all()
+        local_friends = session.scalars(select(FriendsList).all())
 
         
         
@@ -153,6 +154,10 @@ class UserRepo:
         # Find the known peer that matches the user on track to being deleted
         for peer in local_knownPeers:
             session.delete(peer)
+        
+        # Clear user's friends list
+        for friend in local_friends:
+            session.delete(friend)
 
         session.flush()
 
