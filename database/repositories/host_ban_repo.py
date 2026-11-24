@@ -60,7 +60,7 @@ class HostBanRepo:
 
     # Update -----------------------------------------------------------------------
 
-    def update_bannedReason(self, session: Session, peerPublicKey: bytes, newReason: str) -> HostBan | None:
+    def update_bannedReason(self, session: Session, peerPublicKey: bytes, newReason: str) -> HostBan | bool:
         query = select(HostBan).where(peerPublicKey == HostBan.peer_public_key)
         why_banned = session.scalar(query)
 

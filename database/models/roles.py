@@ -9,7 +9,6 @@ class Roles(Base):
     role_id: Mapped[str] = mapped_column(
         String,
         primary_key = True,
-        unique = True,
         nullable = False
     )
 
