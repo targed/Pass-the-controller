@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from database.models.user import User
 from database.models.user_settings import UserSettings
 from database.repositories.user_settings_repo import UserSettingsRepo
+from database.models.known_peer import KnownPeer
 
 # Later optimizations: 
 # - user_create should call the functions for creating the key and password hash as a user should have those upon creation. More convenient if whole thing happens in one go
@@ -120,23 +121,32 @@ class UserRepo:
 
     # Delete -----------------------------------------------------------------------
 
+    #  Not only deletes user but it's child tables as well
     def delete_user(self, session: Session) -> bool:
 
+
+    
         query_for_user = select(User)
         query_for_settings = select(UserSettings)
-
-
+        
         local_user = session.scalars(query_for_user).first()
         local_settings = session.scalars(query_for_settings).first()
 
-
-
         if local_user is None or local_settings is None:
             return False
-        
 
+
+        local_knownPeers = session.scalars(select(KnownPeer).where(KnownPeer.owner_user_id == local_user.user_id)).all()
+
+        # Find the known peer that matches the user on track to being deleted
+        
         # Remove child tables first
         session.delete(local_settings)
+
+        # Find the known peer that matches the user on track to being deleted
+        for peer in local_knownPeers:
+            session.delete(peer)
+
         session.flush()
 
         # Remove the user itself
