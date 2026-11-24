@@ -13,9 +13,12 @@ from datetime import datetime, timezone
 class KnownPeerRepo:
 
     # Create -----------------------------------------------------------------------
-    def create_knownPeer(self, session: Session, peerPublicKey: bytes) -> Known_Peer:
+    def create_knownPeer(self, session: Session, peerPublicKey: bytes) -> KnownPeer:
         query = select(User)
         local_user = session.scalar(query)
+
+        if local_user is None:
+            raise ValueError("ERROR: create_knownPeer() FAILED, a user must exist first")
 
         current_time = datetime.now(timezone.utc).isoformat()
 
@@ -33,21 +36,21 @@ class KnownPeerRepo:
         return session.scalar(query)
     
 
-    def get_peer_firstSeen(self, session: Session, peerPublicKey: bytes) -> UserSettings | None:
-        query = select(KnownPeer).where(peerPublicKey == KnownPeer.peer_public_key)
+    def get_peer_firstSeen(self, session: Session, peerPublicKey: bytes) -> str | None:
+        query = select(KnownPeer.first_seen).where(KnownPeer.peer_public_key == peerPublicKey)
         peer_firstSeen = session.scalar(query)
-        return peer_firstSeen.first_seen
+        return peer_firstSeen
     
-    def get_peer_lastSeen(self, session: Session, peerPublicKey: bytes) -> UserSettings | None:
-        query = select(KnownPeer).where(peerPublicKey == KnownPeer.peer_public_key)
+    def get_peer_lastSeen(self, session: Session, peerPublicKey: bytes) -> str | None:
+        query = select(KnownPeer.last_seen).where(KnownPeer.peer_public_key == peerPublicKey)
         peer_lastSeen = session.scalar(query)
-        return peer_lastSeen.last_seen
+        return peer_lastSeen
 
     
 
     # Update -----------------------------------------------------------------------
 
-    def update_peer_lastSeen(self, session: Session, peerPublicKey: bytes) -> UserSettings | None:
+    def update_peer_lastSeen(self, session: Session, peerPublicKey: bytes) -> str | None:
         query = select(KnownPeer).where(peerPublicKey == KnownPeer.peer_public_key)
         peer_lastSeen = session.scalar(query)
 

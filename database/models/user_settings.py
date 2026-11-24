@@ -15,6 +15,7 @@ class UserSettings(Base):
 
     display_name: Mapped[str] = mapped_column(
         String(20),
+        CheckConstraint("length(display_name) BETWEEN 1 AND 20"),
         nullable = False
     )
 

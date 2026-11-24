@@ -26,7 +26,7 @@ class HostBan(Base):
         nullable = False
     )
 
-    ban_reason: Mapped[str] = mapped_column(
+    ban_reason: Mapped[str | None] = mapped_column(
         String,
         nullable = True
     )

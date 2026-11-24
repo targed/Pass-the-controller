@@ -16,6 +16,9 @@ class UserSettingsRepo:
         query = select(User)
         local_user = session.scalar(query)
 
+        if local_user is None:
+            raise ValueError("ERROR: create_userSettings() FAILED, a corresponding user must exist before a user settings instance can")
+
         newUserSettings = UserSettings(user_id = local_user.user_id, display_name = "Guest", notification_prefs = 1, audio_volume = 50) # Default values
 
         session.add(newUserSettings)
@@ -28,6 +31,9 @@ class UserSettingsRepo:
         query = select(UserSettings)
         local_settings = session.scalar(query)
 
+        if local_settings is None:
+            return None
+
         return local_settings.user_id
     
 
@@ -35,43 +41,44 @@ class UserSettingsRepo:
         query = select(UserSettings)
         local_settings = session.scalar(query)
 
+        if local_settings is None:
+            return None
+
+
         return local_settings.display_name
     
 
     def get_local_profilePicture(self, session: Session) -> UserSettings | None:
         query = select(UserSettings)
         local_settings = session.scalar(query)
+
+        if local_settings is None:
+            return None
         
         return local_settings.profile_picture
     
+
     def get_local_notificationPrefs(self, session: Session) -> UserSettings | None:
         query = select(UserSettings)
         local_settings = session.scalar(query)
 
+        if local_settings is None:
+            return None
+
         return local_settings.notification_prefs
     
+
     def get_local_audioVolume(self, session: Session) -> UserSettings | None:
         query = select(UserSettings)
         local_settings = session.scalar(query)
+
+        if local_settings is None:
+            return None
 
         return local_settings.audio_volume
     
 
     # Update -----------------------------------------------------------------------
-
-    def update_local_settingsID(self, session: Session, newUserID: str) -> UserSettings | None:
-        query = select(UserSettings)
-        local_settings = session.scalars(query).first()
-        
-        if local_settings is None:
-            return
-        
-
-        local_settings.user_id = newUserID
-        session.commit()
-
-        return local_settings
-    
 
     def update_local_displayName(self, session: Session, newDisplayName: str) -> UserSettings | None:
         query = select(UserSettings)

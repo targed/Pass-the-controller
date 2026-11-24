@@ -5,6 +5,9 @@ from database.models.user_settings import UserSettings
 from database.repositories.user_settings_repo import UserSettingsRepo
 from database.models.known_peer import KnownPeer
 from database.models.host_ban import HostBan
+from database.models.friends_list import FriendsList
+from uuid import uuid4
+
 
 # Later optimizations: 
 # - user_create should call the functions for creating the key and password hash as a user should have those upon creation. More convenient if whole thing happens in one go
@@ -15,7 +18,7 @@ class UserRepo:
     # Create -----------------------------------------------------------------------
 
     def create_user(self, session: Session, newFName: str, newLName: str) -> User:
-        newUser = User(first_name = newFName, last_name = newLName, user_id = "user_id", public_key = b"public_key", password_hash = "password") #Default values
+        newUser = User(first_name = newFName, last_name = newLName, user_id = str(uuid4()), public_key = b"public_key", password_hash = "password") #Default values
         session.add(newUser)
 
         session.flush()
@@ -52,19 +55,6 @@ class UserRepo:
 
 
     # Update -----------------------------------------------------------------------
-
-    def update_local_id(self, session: Session, new_user_id: str) -> User | None:
-        query = select(User)
-        local_user = session.scalar(query)
-        
-        if local_user is None:
-            raise ValueError("ERROR: update_local_id() FAILED, user does not exist")
-        
-
-        local_user.user_id = new_user_id
-        session.commit()
-
-        return local_user
 
     def update_local_publicKey(self, session: Session, newPublicKey: bytes) -> User | None:
         query = select(User)
@@ -139,7 +129,7 @@ class UserRepo:
         # Anytime a table has multiple users, we must collect all entries and use loops to delete each tuple one-by-one
         local_knownPeers = session.scalars(select(KnownPeer).where(KnownPeer.owner_user_id == local_user.user_id)).all()
         local_bans = session.scalars(select(HostBan)).all()
-        local_friends = session.scalars(select(FriendsList).all())
+        local_friends = session.scalars(select(FriendsList).where(FriendsList.owner_user_id == local_user.user_id)).all()
 
         
         

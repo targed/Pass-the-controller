@@ -19,13 +19,14 @@ class HostBanRepo:
         query_for_id = select(User)
         local_user = session.scalar(query_for_id)
 
+        if local_user is None:
+            raise ValueError("ERROR: create_hostBan() FAILED, a user must exist first")
+
         query_for_key = select(KnownPeer).where(KnownPeer.peer_public_key == peerPublicKey, KnownPeer.owner_user_id == local_user.user_id)
         knownPeerKey = session.scalar(query_for_key)
 
         if knownPeerKey is None:
             raise ValueError("Cannot ban a peer that is not in KnownPeer")
-
-
 
 
         current_time = datetime.now(timezone.utc).isoformat()
@@ -36,15 +37,24 @@ class HostBanRepo:
         return newHostBan
 
     # Read -----------------------------------------------------------------------
-    def get_bannedAt(self, session: Session, peerPublicKey: bytes) -> HostBan:
+    def get_bannedAt(self, session: Session, peerPublicKey: bytes) -> HostBan | None:
         query = select(HostBan).where(peerPublicKey == HostBan.peer_public_key)
         banned_time = session.scalar(query)
+
+        if banned_time is None:
+            return None
+
         return banned_time.banned_at
     
 
-    def get_bannedReason(self, session: Session, peerPublicKey: bytes) -> HostBan:
+    def get_bannedReason(self, session: Session, peerPublicKey: bytes) -> HostBan | None:
         query = select(HostBan).where(peerPublicKey == HostBan.peer_public_key)
         why_banned = session.scalar(query)
+
+        if why_banned is None:
+            return None
+
+
         return why_banned.ban_reason
 
 
