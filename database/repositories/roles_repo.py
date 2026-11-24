@@ -59,6 +59,7 @@ class RolesRepo:
 
         new_role = self.get_role(session, newName)
 
+        # new_role is temporary role to test if the role_id from the original is carrying over to the new one
         if new_role is not None:
             if new_role.role_id != role_to_update.role_id:
                 raise ValueError("ERROR: update_role() FAILED, role already exists")

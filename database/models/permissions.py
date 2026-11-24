@@ -6,7 +6,7 @@ from database.base import Base
 class Permissions(Base):
     __tablename__ = "PERMISSIONS"
 
-    permissions_id: Mapped[str] = mapped_column(
+    permission_id: Mapped[str] = mapped_column(
         String,
         primary_key = True,
         nullable = False
