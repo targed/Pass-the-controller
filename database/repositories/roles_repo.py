@@ -1,6 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from database.models.roles import Roles
+from database.models.role_permissions import RolePermission
 from uuid import uuid4
 
 
@@ -81,6 +82,12 @@ class RolesRepo:
         if role_to_delete is None:
             return False
         
+
+        query = select(RolePermission).where(RolePermission.role_id == role_to_delete.role_id)
+        role_perms_to_delete = session.scalars(query).all()
+
+        for rolePerms in role_perms_to_delete:
+            session.delete(rolePerms)
 
        
         session.delete(role_to_delete)
