@@ -9,6 +9,15 @@ class Room(Base):
     room_id: Mapped[str] = mapped_column(
         String,
         primary_key = True,
-        unique = True,
+        nullable = False
+    )
+
+    owner_public_key: Mapped[bytes] = mapped_column(
+        LargeBinary,
+        nullable = False
+    )
+
+    room_name: Mapped[str] = mapped_column(
+        String,
         nullable = False
     )
