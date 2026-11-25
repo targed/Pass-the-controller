@@ -2,6 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 from database.models.user import User
 from database.models.user_settings import UserSettings
+from database.models.room_member import RoomMember
 from database.repositories.user_settings_repo import UserSettingsRepo
 from database.models.known_peer import KnownPeer
 from database.models.host_ban import HostBan
@@ -130,6 +131,7 @@ class UserRepo:
         local_knownPeers = session.scalars(select(KnownPeer).where(KnownPeer.owner_user_id == local_user.user_id)).all()
         local_bans = session.scalars(select(HostBan)).all()
         local_friends = session.scalars(select(FriendsList).where(FriendsList.owner_user_id == local_user.user_id)).all()
+        local_membership = session.scalars(select(RoomMember).where(RoomMember.member_public_key == local_user.public_key)).all()
 
         
         
@@ -148,6 +150,10 @@ class UserRepo:
         # Clear user's friends list
         for friend in local_friends:
             session.delete(friend)
+
+        # Clear user's active room memberships
+        for membership in local_membership:
+            session.delete(membership)
 
         session.flush()
 
