@@ -1,0 +1,20 @@
+[project]
+name = "pass-the-controller"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Joshua Dobbs", email = "joshuadobbs812@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "pysdl2>=0.9.17",
+    "pysdl2-dll>=2.32.10",
+]
+
+[project.scripts]
+pass-the-controller = "pass_the_controller:main"
+
+[build-system]
+requires = ["uv_build>=0.13.9,<0.14.0"]
+build-backend = "uv_build"
